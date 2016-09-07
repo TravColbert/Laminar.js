@@ -1,0 +1,314 @@
+/***
+ * Laminar Documentation Styles
+ *
+ */
+
+/***
+ * COLORS
+ */
+@laminargray: #3d3b30;
+@laminarblue: #4d5061;
+@laminarlightblue: #8491a3;
+@laminarred: #ef9b7c;
+@laminarbrown: #D8C99B;
+@laminaryellow: #fff05a;
+@laminarwhite: #fcfcfc;
+@laminarshadow: #c0c0c0;
+
+@menuforegroundcolor: @laminarwhite;
+@menubackgroundcolor: @laminarlightblue;
+
+@titleforegroundcolor: @laminarwhite;
+@titlebackgroundcolor: none;
+
+@normalforegroundcolor: @laminargray;
+@normalbackgroundcolor: @laminarwhite;
+
+@highlightforegroundcolor: @laminarlightblue;
+@highlightbackgroundcolor: none;
+
+@invertedforegroundcolor: @laminarwhite;
+@invertedbackgroundcolor: @laminargray;
+
+@urgentforegroundcolor: @laminarred;
+@urgentbackgroundcolor: @laminarbrown;
+
+@demoforegroundcolor: @laminarblue;
+@demobackgroundcolor: @laminarbrown;
+
+@statusforegroundcolor: @laminarblue;
+@statusbackgroundcolor: @laminaryellow;
+
+@shadowcolor: @laminarshadow;
+
+/***
+ * TEXT
+ */
+@titlefontfamily: 'Krona One', sans-serif;
+@normalfontfamily: 'Open Sans Condensed', sans-serif;
+@highlightfontfamily: 'Montserrat', sans-serif;
+@normalfontsize: 1.1em;
+.normaltext {
+  font-size: @normalfontsize;
+  color: @normalforegroundcolor;
+  font-family: @normalfontfamily;
+}
+.shadowedtext {
+  text-shadow: 0px 0px 0.4px @shadowcolor;
+}
+
+/***
+ * BOX MODEL & LAYOUT
+ */
+@normalborderradius: 4px;
+@topmargin: 40px;
+@contentmargin: 10px;
+
+/***
+ * SHADOWS and EFFECTS
+ */
+@transitionspeed: 0.4s;
+
+.smoothtransitions {
+  -webkit-transition: all @transitionspeed;
+  -moz-transition: all @transitionspeed;
+  -o-transition: all @transitionspeed;
+  transition: all @transitionspeed;
+}
+
+/***
+ * MENUS
+ */
+nav.top li, nav.top a {
+  height: @topmargin;
+  line-height: @topmargin;
+}
+.menu {
+  display: block;
+  width: 90%;
+  max-width: 960px;
+  color: @menuforegroundcolor;
+  .smoothtransitions
+}
+.menu a {
+  text-decoration: none;
+}
+.menu a, .menu a:visited {
+  color: @menuforegroundcolor;
+}
+.menu a:hover, .menu a:target {
+  color: @menuforegroundcolor + 666;
+}
+.menu-items {
+  display: inline-block;
+  margin: 0 50px;
+  padding: 0px;
+}
+#sitelink {
+  display: inline-block;
+  margin-right: 60px;
+  margin-left: 10px;
+  color: @titleforegroundcolor;
+  font-weight: bold;
+}
+.menu-items li {
+  display: inline-block;
+  padding: 0 15px;
+}
+.menu-items li:hover {
+  background-color: @laminarred;
+}
+.show, .hide {
+  display: none;
+  padding-left: 15px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center left;
+}
+
+//.show {
+//  background-image: url(assets/down-arrow-icon.png);
+//}
+//.hide {
+//  background-image: url(assets/up-arrow-icon.png);
+//}
+
+@media only screen and (max-width: 800px) {
+  .menu {
+    position: relative;
+    width: 100%;
+  }
+  .sitename {
+    position: absolute;
+    top: 0;
+    left: 15px;
+    margin-left: 0px;
+  }
+  .menu-items {
+    display: none;
+    width: 100%;
+    margin-top: @topmargin;
+    background-color: @laminarblue;
+  }
+  .menu-items li {
+    display: block;
+    text-align: center;
+  }
+  .show, .hide {
+    position: absolute;
+    top: 0;
+    right: 15px;
+  }
+  .show {
+    display: inline-block;
+  }
+  .hide {
+    display: none;
+  }
+  #menu:target .show {
+    display: none;
+  }
+  #menu:target .hide, #menu:target .menu-items {
+    display: inline-block;
+    opacity: 0.5;
+  }
+}
+
+@media only screen and (max-width: 220px) {
+  .sitename, .show, .hide {
+    font-size: 14px;
+  }
+}
+
+/***
+ * MAIN CSS
+ */
+body {
+  .normaltext;
+  .shadowedtext;
+  background-color: @normalbackgroundcolor;
+  margin: 0px;
+  margin-top: @topmargin;
+}
+nav.top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 100%;
+  height: @topmargin;
+  color: @menuforegroundcolor;
+  background-color: @menubackgroundcolor;
+  box-shadow: 0px 1px 2px @shadowcolor;
+}
+.header {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  background: @laminarred url(../assets/bg3.jpg) no-repeat center center fixed;
+  //background: @laminarred;
+  background-size: cover;
+  padding-bottom: 30px;
+}
+.header .button {
+  font-weight: bold;
+  font-family: @normalfontfamily;
+  border: 2px solid @laminargray;
+  border-radius: 5px;
+  margin: 10px 20px;
+  padding: 5px 10px;
+  text-decoration: none;
+  color: @laminargray;
+  background-color: @laminarwhite;
+  opacity: 0.5;
+  .smoothtransitions
+}
+.header .button:hover {
+  color: @laminarwhite;
+  background-color: @laminarlightblue;
+  border-color: @laminarwhite;
+  opacity: 1;
+}
+.content {
+  padding: @contentmargin;
+  padding-top: 0px;
+}
+h1 {
+  font-size: 4em;
+  font-family: @titlefontfamily;
+  font-weight: normal;
+  line-height: 2.5em;
+  color: @laminarwhite;
+  background-color: @titlebackgroundcolor;
+  text-shadow: -1px -1px 1px @laminarlightblue,
+    1px -1px 1px @laminarlightblue,
+    1px 1px 1px @laminarlightblue,
+    -1px 1px 1px @laminarlightblue;
+  margin: 0px;
+}
+h2, h3, h4, h5, h6 {
+  font-family: @highlightfontfamily;
+  color: @highlightforegroundcolor;
+  background-color: @highlightbackgroundcolor;
+  .shadowedtext
+}
+h2 {
+  border-bottom: 2px solid @highlightforegroundcolor;
+}
+h3 {
+  font-size: 1.1em;
+  border: none;
+}
+p.summary {
+  color: @titleforegroundcolor;
+  font-weight: bold;
+  color: @laminargray;
+  margin-bottom: 60px;
+  text-shadow: 0px 0px 10px rgba(255,255,255,1.0);
+  //text-shadow: -1px -1px 3px rgba(255,255,255,1.0), 1px -1px 3px rgba(255,255,255,1.0), 1px 1px 3px rgba(255,255,255,1.0), -1px 1px 3px rgba(255,255,255,1.0);
+}
+em {
+  font-family: serif;
+}
+pre, .demo {
+  border-radius: @normalborderradius;
+  padding: 1em;
+}
+pre {
+  color: @invertedforegroundcolor;
+  background-color: @invertedbackgroundcolor;
+  overflow-x: auto;
+}
+progress {
+  border: 1px solid @laminargray;
+}
+.demo, .slow {
+  .smoothtransitions;
+}
+.demo {
+  font-family: @highlightfontfamily;
+  color: @demoforegroundcolor;
+  background-color: @demobackgroundcolor;
+  .shadowedtext
+}
+.urgent {
+  font-weight: bold;
+  color: @urgentforegroundcolor;
+  background-color: @urgentbackgroundcolor
+}
+.status {
+  color: @statusforegroundcolor;
+  background-color: @statusbackgroundcolor;
+}
+.caption {
+  font-size: .8em;
+  font-style: italic;
+}
+.right {
+  margin-left: 50%;
+}
+#cobject {
+  color: @laminarwhite;
+  background-color: @laminarlightblue;
+  .shadowedtext;
+}

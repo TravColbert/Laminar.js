@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Laminar Examples</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<link rel="stylesheet" href="css/laminar_doc.css">
+<!--
+<link href='https://fonts.googleapis.com/css?family=Slabo+27px' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Krona+One' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+-->
+</head>
+<body>
+<script src="../laminar.js"></script>
+<script>
+  var aLink = new Laminar.Widget({
+    id:"alink",
+    element:"a",
+    proplist:[["href","http://test.com"],["note","This is a note"]],
+    content:"A Link!",
+    classlist:["link"]
+  }).update();
+
+  aLi = new Laminar.Widget({
+    id:"ali",
+    element:"li",
+    content:aLink
+  }).update();
+
+  bLink = new Laminar.Widget({
+    id:"blink",
+    element:"a",
+    proplist:[["href","http://test.com"],["note","This is a note"]],
+    content:"A Link!",
+    classlist:["link"]
+  }).update();
+
+  bLi = new Laminar.Widget({
+    id:"bli",
+    element:"li",
+    content:bLink
+  }).update();
+
+  cLink = new Laminar.Widget({
+    id:"clink",
+    element:"a",
+    proplist:[["href","http://test.com"],["note","This is a note"]],
+    content:"A Link!",
+    classlist:["link"]
+  }).update();
+
+  cLi = new Laminar.Widget({
+    id:"cli",
+    element:"li",
+    content:cLink
+  }).update();
+
+  siteLink = new Laminar.Widget({
+    id:"sitelink",
+    element:"a",
+    proplist:[["href","index.html"]],
+    classlist:["sitename"],
+    content:"Laminar WebUI Toolkit"
+  }).update();
+
+  menuLinkShow = new Laminar.Widget({
+    id:"menulinkshow",
+    element:"a",
+    proplist:[["href","#menu"]],
+    classlist:["show"],
+    content:"Menu"
+  }).update();
+
+  menuLinkHide = new Laminar.Widget({
+    id:"menulinkhide",
+    element:"a",
+    proplist:[["href","#hidemenu"]],
+    classlist:["hide"],
+    content:"Menu"
+  }).update();
+
+  uList = new Laminar.Widget({
+    id:"ulist",
+    element:"ul",
+    classlist:["menu-items"],
+    content:[aLi,bLi,cLi]
+  }).update();
+
+  menuDiv = new Laminar.Widget({
+    id:"menu",
+    classlist:["menu"],
+    content:[siteLink,menuLinkShow,menuLinkHide,uList]
+  }).update();
+
+  topNavBar = new Laminar.Widget({
+    id:"topnavbar",
+    element:"nav",
+    classlist:["top"],
+    content:menuDiv,
+    parent:"body"
+  }).update();
+</script>
+<section class="header">
+  <div class="description">
+    <h1>Laminar</h1>
+    <p class="summary">A simple, programmatic web-UI toolkit.</p>
+    <a class="button" href="//sixrevisions.com/css/fixed-navigation-bar/">Get Laminar</a>
+    <a class="button" href="//github.com/sixrevisions/fixed-navigation-bar">See The Examples</a>
+  </div>
+</section>
+<section class="content">
+<h2>Basics</h2>
+<p class="documentation">Laminar objects are created programatically.</p>
+<p class="documentation">Here is a basic Laminar object. By default, Laminar
+  objects are DIVs but they can be any DOM object type by using the <em>element</em>
+  property.</p>
+<p class="documentation">Notice that the ID of the object is <em>firstelement</em> while
+  the Javscript name for this Laminar object is <em>firstElement</em> (note the
+  camel-case lettering). Knowing the Javascript name of the object allows you to
+  programmatically modify the object.</p>
+<pre>
+  firstElement = new Laminar.Widget({
+    id:"firstelement",
+    content:"Some text",
+    classlist:["demo"],
+    label:"Hello?",
+    parent:".content"
+  }).update();
+</pre>
+<p class="documentation">Result:</p>
+<script>
+  // Create a basic DOM element. The default is just a DIV
+  // Give it an ID of "myelement"
+  firstElement = new Laminar.Widget({
+    id:"firstelement",
+    content:"Some text",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+</script>
+<p class="documentation caption">If you look at the source of this page you will
+  see that all of the elements we are creating have a class of <em>demo</em>. This is
+  so that we can add a little bit of styling to our created Laminar objects to
+  make them easier to see. By default, Laminar objects do not come with the demo
+  class attached.</p>
+<p class="documentation">You can see that we define a Laminar widget by giving the
+  Laminar.Widget constructor a little object that looks like this:</p>
+<pre>
+  {
+    id:"firstelement",
+    content:"Some text",
+    classlist:["demo"],
+    parent:".content"
+  }
+</pre>
+<p class="documentation">After passing-in the configuration object to the constructor
+  we call the widget's <em>update()</em> method with places the widget in the DOM.</p>
+<p class="documentation">This made an element in this web page (in the element with the
+  <em>content</em> class that looks like this behind the scenes:</p>
+<pre>
+  &lt;div id="firstelement" class="lm demo"&gt;Some text&lt;/div&gt;
+</pre>
+<p class="documentation">You see where all of the elements in the DOM object
+  come from. The only one that we didn't specify was the class attribute of
+  <em>lm</em>. Every Laminar object gets the <em>lm</em> class (and others like it).</p>
+
+<h2>Parent</h2>
+<p class="documentation">The <em>parent</em> property (above) says <em>.content</em>. This
+  property specifies that the resulting Laminar object will be placed in the
+  element with the class of <em>content</em> in the rendered web page.</p>
+<p class="documentation">You may specify any pre-existing DOM element as a
+  parent for your Laminar object - as long as the element is a container type
+  object. If you don't specify a parent property when you build your Laminar
+  object, the object will be created, but will not be placed in a DOM element in
+  your web page.</p>
+<p class="documentation">This isn't a bad thing. It allows you to build Laminar
+  objects, manipulate them, then finally place them in your web page later.</p>
+
+<h2>Contents</h2>
+<p class="documentation">You see that property called <em>content</em> in the
+  code above? The <em>content</em> property lets you fill your Laminar object
+  with something else - text, HTML, even another Laminar object!</p>
+<p class="documentation">Let's add some more elements inside our Laminar object:</p>
+<pre>
+  childObject = new Laminar.Widget({
+    id:"cobject",
+    element:"input",
+    content:"I am the child!",
+  }).update();
+
+  parentObject = new Laminar.Widget({
+    id:"pobject",
+    content:["I am the parent!", childObject],
+    parent:".content"
+  }).update();
+</pre>
+<script>
+  childObject = new Laminar.Widget({
+    id:"cobject",
+    content:"I am the child.",
+    classlist:["mini","demo"]
+  }).update();
+
+  parentObject = new Laminar.Widget({
+    id:"pobject",
+    content:["I am the parent.", childObject],
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+</script>
+<p class="documentation">When we want to add multiple items as contents of an
+  object, simply package them in an array.</p>
+
+<h2>Elements</h2>
+<p class="documentation">Laminar objects don't have to be just DIVs.</p>
+<p class="documentation">Let's create a simple paragraph ("p") element. Use the
+  element property to specify what you want to make:</p>
+<pre>
+  secondElement = new Laminar.Widget({
+    id:"paragraphelement",
+    element:"p",
+    contents:"This is a paragraph that was created programatically"
+  }).update();
+</pre>
+<script>
+  secondElement = new Laminar.Widget({
+    id:"paragraphelement",
+    element:"p",
+    content:"This is a paragraph that was created programatically",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+</script>
+<p class="documentation caption">See how we added the "element" property to
+  specify what kind of DOM element we were making?</p>
+
+<p class="documentation">How about a button? Easy:</p>
+<script>
+  buttonHolderDiv = new Laminar.Widget({
+    id:"buttonholder",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+
+  buttonElement = new Laminar.Widget({
+    id:"linkelement",
+    element:"input",
+    type:"button",
+    value:"Press Me",
+    content:"This is a button",
+    parent: "#buttonholder"
+  }).update();
+</script>
+<p class="documentation">This button doesn't do anything yet, but at least it is
+  there. Later we will learn how to make any Laminar object do something.</p>
+<p class="documentation">We created this Laminar object like this:</p>
+<pre>
+  buttonElement = new Laminar.Widget({
+    id:"linkelement",
+    element:"input",
+    type:"button",
+    value:"Press Me",
+    content:"This is a button",
+    parent: "#buttonholder"
+  }).update();
+</pre>
+<p class="documentation">See how we have added a <em>type</em> and <em>value</em>
+  property to our Laminar object? Also, note that we told the button that its
+  parent container was <em>#buttonholder</em>. Parents can be ids or classes.</p>
+<p class="documentation">Simply changing the <em>type</em> to <i>"textinput"</i> makes the
+  object render like this:</p>
+<script>
+  inputHolderDiv = new Laminar.Widget({
+    id:"inputholder",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+
+  textinputElement = new Laminar.Widget({
+    id:"textinputelement",
+    element:"input",
+    type:"textinput",
+    value:"Press Me",
+    content:"This is a button",
+    parent:"#inputholder"
+  }).update();
+
+  setInterval(function() {
+    switch(textinputElement.get("type")) {
+      case "button":
+        textinputElement.set("type","textinput");
+      break;
+      default:
+        textinputElement.set("type","button");
+    }
+  },1000);
+</script>
+<p class="documentation">By the way... how are we making the above element
+  switch back and forth between "textinput" and "button"?</p>
+<p class="documentation">Simply by telling the Laminar object we created earlier
+  called buttonElement to set its "type" to another type of input. We do it in
+  plain Javascript by referencing the Javascript object's name like this:</p>
+<pre>
+  buttonElement.set("type","textinput");
+</pre>
+<p class="documentation">We simply called the Laminar widget's <em>set()</em>
+  method to change the type setting to something else.</p>
+<p class="documentation">There's no need to add any fancy add-on libraries to
+  manipulate Laminar objects. It's all built-in to each one of them.</p>
+
+<h2>Classes</h2>
+<p class="documentation">Now let us try creating an object and giving it a class.</p>
+<p>Let's make the class: "urgent":</p>
+<pre>
+  thirdElement = new Laminar.Widget({
+    id:"divelement",
+    content:"This is urgent text",
+    classlist:["urgent"],
+    parent:"#holderdiv3"
+  }).update();
+</pre>
+<script>
+  holderDiv3 = new Laminar.Widget({
+    id:"holderdiv3",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+
+  thirdElement = new Laminar.Widget({
+    id:"divelement",
+    content:"This is urgent text",
+    classlist:["urgent"],
+    parent:"#holderdiv3"
+  }).update();
+</script>
+<p class="documentation">You can specify as many classes as you want:</p>
+<pre>
+  fourthElement = new Laminar.Widget({
+    id:"statusmessage",
+    content:"Here is an important message",
+    classlist:["status","caption"],
+    parent:".content"
+  });
+</pre>
+<script>
+  holderDiv4 = new Laminar.Widget({
+    id:"holderdiv4",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+
+  fifthElement = new Laminar.Widget({
+    id:"statusmessage",
+    content:"Here is an important message",
+    classlist:["status","caption","demo"],
+    parent:"#holderdiv4"
+  }).update();
+</script>
+
+<p class="documentation">We can toggle classes for objects that have already
+  been made:</p>
+<pre>
+  fifthElement.toggleClass("status");
+</pre>
+<script>
+  holderDiv6 = new Laminar.Widget({
+    id:"holderdiv6",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+
+  sixthElement = new Laminar.Widget({
+    id:"switchingmessage",
+    content:"Here is an important message",
+    classlist:["status","caption","demo"],
+    parent:"#holderdiv6"
+  }).update();
+
+  setInterval(function() {
+    sixthElement.toggleClass("status");
+  },1000);
+</script>
+
+<h2>CSS</h2>
+<p class="documentation">We can also programatically manipulate CSS styles
+  directly:</p>
+<pre>
+  fifthElement.css("color","#fff05a");
+</pre>
+<script>
+  holderDiv7 = new Laminar.Widget({
+    id:"holderdiv7",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+
+  seventhElement = new Laminar.Widget({
+    id:"roundingmessage",
+    content:"Here is an important message",
+    value:0,
+    classlist:["demo"],
+    parent:"#holderdiv7"
+  }).update();
+
+  setInterval(function() {
+    if(seventhElement.get("value") == 1) {
+      seventhElement.css("color","#fff05a");
+      seventhElement.set("value",0);
+    } else {
+      seventhElement.css("color","inherit");
+      seventhElement.set("value",1);
+    }
+  },1000);
+</script>
+
+<h2>Events</h2>
+<p class="documentation">You can tell an Laminar object what to do when it senses
+  an event. We use the 'setEvent' method:</p>
+<pre>
+  LaminarObject.setEvent(event,function);
+</pre>
+<p class="documentation">We decided to get a little <i>shifty</i> with the below
+  element by adding a function that reacts to a "click" event:</p>
+<pre>
+  var trigger = function(e, obj) {
+    obj.toggleClass("right");
+  }
+
+  shiftyElement.setEvent("click",trigger);
+</pre>
+<p class="documentation">You see how we created a function called "trigger",
+  then we told our Laminar object to execute that function when it is clicked.</p>
+<p class="documentation">Try it!:</p>
+<script>
+  shiftyElement = new Laminar.Widget({
+    id:"shiftyelement",
+    value:"Click Me!",
+    element:"input",
+    type:"button",
+    classlist:["slow"],
+    parent:".content"
+  }).update();
+
+  var trigger = function(e, obj) {
+    // alert("Trigger function fired on " + e.type + " event on "+ obj.object.id);
+    obj.toggleClass("right");
+  }
+
+  shiftyElement.setEvent("click",trigger);
+</script>
+<p class="documentation">The "trigger" function simply toggles a class that
+  positions the element. Every time you click the element, the trigger function
+  is fired and the class is toggled on and off.</p>
+<p class="documentation">You can see that the event that the Laminar object will
+  call should receive two parameters: a string representing the event, and the
+  Laminar object itself.</p>
+
+<h2>Dimensions & Position</h2>
+<p class="documentation">Sometimes you need to know the dimensions and
+  positioning of your Laminar objects. You can ask any Laminar object where it
+  exists in the universe using getTop(), getLeft(), or getPosition().</p>
+<script>
+  locatorElement = new Laminar.Widget({
+    id:"locatorelement",
+    content:"shiftyElement is: " + shiftyElement.getLeft() + "(x) " + shiftyElement.getTop() + "(y) " + shiftyElement.getHeight() + "(h) " + shiftyElement.getWidth() + "(w)",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+
+  var updateSize = function(e, obj) {
+    locatorElement.empty();
+    locatorElement.content("shiftyElement is: " + obj.getLeft() + "(x) " + obj.getTop() + "(y) " + obj.getHeight() + "(h) " + obj.getWidth() + "(w)")
+  }
+
+  shiftyElement.setEvent("transitionend",updateSize);
+</script>
+<p class="documentation">You may have noticed that this Laminar object changes
+  when the previous Laminar object (called "shifty") moves. This is another
+  example of setting events to our objects.</p>
+<pre>
+  locatorElement = new Laminar.Widget({
+    id:"locatorelement",
+    content:"shiftyElement is: " + shiftyElement.getLeft() + "(x) " + shiftyElement.getTop() + "(y) " + shiftyElement.getHeight() + "(h) " + shiftyElement.getWidth() + "(w)",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+
+  var updateSize = function(e, obj) {
+    locatorElement.empty();
+    locatorElement.content("shiftyElement is: " + obj.getLeft() + "(x) " + obj.getTop() + "(y) " + obj.getHeight() + "(h) " + obj.getWidth() + "(w)")
+  }
+
+  shiftyElement.setEvent("transitionend",updateSize);
+</pre>
+
+<h2>State Objects</h2>
+<p class="documentation">Related to classes are states. This is a little
+  different from classes. Classes may be arbitrarily added and removed.
+<p class="documentation">A 'state object', on the other hand, wants to always be
+  in at least one of a set of possible states. Maybe you are designing some
+  cool, custom 3-way toggle control. The toggle control you are designing must
+  always be in one of only 3 states. It can never <i>not</i> be in one of three
+  states.</p>
+<p class="documentation">Laminar makes it easy to implement such a thing.</p>
+<p class="documentation">This may be done by instantiating a new type of Laminar
+  object called a "State Object":</p>
+<script>
+  holderDiv8 = new Laminar.Widget({
+    id:"holderdiv8",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+
+  stateElement = new Laminar.Widget({
+    id:"astateelement",
+    contents:"I am a state object",
+    // value:"",
+    element:"input",
+    type:"button",
+    states:["on","off","idle"],
+    parent:"#holderdiv8"
+  }).update();
+
+  stateElement.set("value",stateElement.getState());
+  stateElement.setEvent("click",function(e, obj) {
+    obj.setNextState();
+    obj.set("value",obj.getState());
+  })
+</script>
+
+<p class="documentation">State objects build upon base objects by adding
+  methods that control how the object moves from one state to another.</p>
+<p class="documentation">Here, we incrementally loop through all of the possible
+  states of this Laminar object. We've defined what all the possible states of
+  this object are like this:</p>
+<pre>
+  stateElement = AppkitStateObject({
+    id:"astateelement",
+    content:"I am a state object",
+    element:"input",
+    type:"button",
+    states:["on","off","idle"],
+    parent:".content"
+  });
+</pre>
+<p class="documentation">You see that we gave 'stateElement' a list of all of
+  the states that it can possibly be in ("on", "off", "idle"). The property that
+  defines these possible states is called 'states'.</p>
+<p class="documentation">Notice that we've alse not given this object a value
+  (buttons usually display thier 'value' attribute). Instead, we set the value
+  of this object after it has been created by using the <em>set()</em> method -
+  setting the 'value' attribute to whatever the current state of the object is.</p>
+<p class="documentation">Finally, we've created an anonymous function that sets
+  the state of the object to whatever the next state should be when the button
+  is clicked. Then, it sets the value of the object to whatever the current
+  state is, like this:</p>
+<pre>
+  // Make the button show what the current state is
+  stateElement.set("value",stateElement.getState());
+
+  // When clicked, invoke this anonymous function which
+  // 1. Sets the next state
+  // 2. Sets the 'value' to the new state thereby showing the state on the button face
+  stateElement.setEvent("click",function(e, obj) {
+    obj.setNextState();
+    obj.set("value",obj.getState());
+  })
+</pre>
+<p class="documentation">If you try to set a Laminar state object to a
+  non-existent state, the object will simply refuse:</p>
+<pre>
+  stateElement.setState("bad_state");
+  // Nothing happens
+
+  stateElement.setState("idle");
+  // Button state set to idle
+</pre>
+<h2>Recipes</h2>
+<p class="documentation">Here are a few simple recipes to build common HTML5
+  objects:</p>
+<h3>Progress</h3>
+<script>
+  progressObject = Laminar.Widget({
+    id:"progress",
+    contents:"I am a state object",
+    value:10,
+    element:"progress",
+    parent:".content"
+  });
+
+  progressObject.set("max",100);
+
+
+  xyzElement.find().style["border"] = "1px solid red";
+</script>
+</section>
+</body>
+</html>
