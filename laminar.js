@@ -693,8 +693,11 @@ Laminar.Model = (function() {
     if(Array.isArray(i)) return this.getByArray(i);
     return this.getByIndex(i);
   };
+
   Model.prototype.add = function(value) {
+    //console.log("New thing is a type of: " + typeof value);
     if(value instanceof Laminar.Model) {
+      //console.log("Adding new Laminar model");
       value.index = this.value.length;
       value.parent = this;
       this.setSubscription(value);
@@ -761,18 +764,23 @@ Laminar.Model = (function() {
     return false;
   };
 
+  /**
+   * Creates default bindings to an object. Those defaults are: update, delete,
+   * and add.
+   *
+   * @param {Object} object Typically the Laminar Model that you have added to
+   * this model.
+   * @returns {bool} true is bindings were created, false if not
+   */
   Model.prototype.setSubscription = function(obj) {
-    if (obj.hasOwnProperty("subscribe")) {
+    if (obj.subscribe) {
       obj.subscribe("update",function(evnt,args) {
-        //this.publish("update",args);
         this.publish("update",this);
       }.bind(this));
       obj.subscribe("delete",function(evnt,args) {
-        //this.publish("delete",args);
         this.publish("update",this);
       }.bind(this));
       obj.subscribe("add",function(evnt,args) {
-        //this.publish("delete",args);
         this.publish("update",this);
       }.bind(this));
       return true;
