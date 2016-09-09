@@ -481,7 +481,7 @@ Laminar.Widget = (function(){
    * @returns {Object} This Laminar widget
    */
   Widget.prototype.update = function() {
-    if(this.parent !== null) {
+    if(this.parent!==null) {
       var foundObject = _findElement(this.parent);
       if(foundObject) foundObject.appendChild(this.object);
     }
@@ -502,10 +502,7 @@ Laminar.Widget = (function(){
       var token = obj.subscribe(evnt,func);
       if(token) {
         return {event:evnt, token:token, obj:obj};
-        //this.subscriptions.push({event:evnt, token:token, obj:obj});
-        //return this;
       }
-      //return false;
     }
 
     if(Array.isArray(evnt)) {
@@ -536,8 +533,6 @@ Laminar.Widget = (function(){
 })();
 
 Laminar.Model = (function() {
-  //"use strict";
-
   var defaultType = 'string';
   var defaultIndex = 0;
   var queryRe = /[=<>]=/;
@@ -553,7 +548,7 @@ Laminar.Model = (function() {
     return true;
   }
 
-  function Model(k, v, t) {
+  function Model(k, v, t) {   // <key|object> <value> <type>
     if(typeof(k)=='object') {
       if(!allKeysPresent(k)) return false;
       if(k.hasOwnProperty("index")) var i = k.index;
@@ -561,45 +556,32 @@ Laminar.Model = (function() {
       v = k.value;
       k = k.key;
     };
-    this.key = k || '';
-    this.index = i || defaultIndex;
     this.value = [];
-    this.type = t || defaultType;
     this.events = {};
     this.eventId = -1;
-    if(v!==undefined) {
-      if(!Array.isArray(v)) v = [v];
-      for(var count=0;count<v.length;count++) {
-        if(typeof(v[count])=='object' && allKeysPresent(v[count])) {
-          //debugBox.append("\nAdding new object (" + count + "): " + v[count]);
-          this.add(new Laminar.Model(v[count]));
-        } else {
-          //debugBox.append("\nAdding value (" + count + "): " + v[count]);
-          //this.value = [v[count]];
-          this.value.push(v[count]);
-        }
-      }
-    } else {
-      //debugBox.append("\nAdding empty value (" + count + ")");
-      this.value = [];
-    }
-    //this.value = (allKeysPresent(v)) ? [new Laminar.Model(v)] : [v]
-    //this.value = (v!==undefined) ? [v] : [];
+
+    this.setKey(k);
+    this.setIndex(i);
+    this.setValue(v);
+    this.setType(t);
   };
 
+  Model.prototype.setIndex = function(i) {
+    return this.index = i || defaultIndex;
+  };
   Model.prototype.getIndex = function() {
     return this.index;
   };
   Model.prototype.getAddress = function() {
     if(this.hasOwnProperty("parent")) {
-      var parentAddress = this.parent.getAddress();
-      parentAddress.push(this.getIndex());
-      return parentAddress;
+      var address = this.parent.getAddress();
+      address.push(this.getIndex());
+      return address;
     }
     return [this.getIndex()];
   };
   Model.prototype.setKey = function(string) {
-    return this.key=string;
+    return this.key=string || '';
   };
   Model.prototype.getKey = function() {
     return this.key;
@@ -610,6 +592,20 @@ Laminar.Model = (function() {
   Model.prototype.getType = function() {
     return this.type;
   }
+  Model.prototype.setValue = function(v) {
+    if(v!==undefined) {
+      if(!Array.isArray(v)) v = [v];
+      v.forEach(function(val,i,a){  // value index array
+        if((val instanceof Laminar.Model) && allKeysPresent(val)) {
+          this.add(new Laminar.Model(val));
+        } else {
+          this.value.push(val);
+        }
+      }.bind(this));
+    } else {
+      this.value = [];
+    }
+  };
   Model.prototype.read = function(index) {
     if(index!==null || index!==undefined) if(this.value[index]) return this.value[index];
     return this.value;
@@ -621,16 +617,24 @@ Laminar.Model = (function() {
     }
     return count;
   };
-  Model.prototype.getByKey = function(keyArray) {
-    //var keyArray = kA.slice(0);
+
+  Model.prototype.get = function(i) {
+    if(!i) return this;
+    if(Array.isArray(i)) return this.getByArray(i);
+    return this.getByIndex(i);
+  };
+
+  Model.prototype.getValueByKey = function(keyArray) {
     var k = keyArray;
     if(Array.isArray(keyArray)) {
       k = keyArray.shift();
     }
     for(var c=0; c<this.value.length; c++) {
       if(this.value[c] instanceof Laminar.Model) {
+        console.log("Searching sub-object: " + this.value[c].key + " (" + Array.isArray(this.value[c].key) + ")");
         if(this.value[c].key==k) {
-          if(keyArray.length>0) {
+          console.log("Found an object with matching key: " + k);
+          if(Array.isArray(keyArray) && keyArray.length>0) {
             return this.value[c].getByArray(keyArray);
           } else {
             return this.value[c].get();
@@ -641,32 +645,10 @@ Laminar.Model = (function() {
       }
     }
   };
-  /*
-  Model.prototype.getByQuery = function(keyArray) {
-    var result = [];
-    var q = keyArray;
-    if(Array.isArray(keyArray)) {
-      q = keyArray.shift();
-    }
-    //q.match(queryRe)
-    var matches = queryRe.exec(q);
-    //alert("Found match at " + matches.index);
-    var objectAddress = q.slice(0,matches.index).split(".");
-    var operator = q.substr(matches.index,2);
-    var value = q.substr((parseInt(matches.index) + 2));
-    //alert("Address: " + objectAddress + ", operator: " + operator + ", value: " + value);
-    //objectAddress = objectAddress.split(".");
-    for(var c=0; c<this.value.length; c++) {
-
-      if(this.value[c].get(objectAddress).read(0)==value) result.push(this.value[c]);
-    }
-    return result;
-  };
-  */
   Model.prototype.getByArray = function(arr) {
     if(typeof arr[0] == "string") {
       //if(isQuery(arr[0])) return this.getByQuery(arr);
-      return this.getByKey(arr);
+      return this.getValueByKey(arr);
     }
     return this.getByIndex(arr);
   };
@@ -688,16 +670,53 @@ Laminar.Model = (function() {
     }
     return false;
   };
-  Model.prototype.get = function(i) {
-    if(!i) return this;
-    if(Array.isArray(i)) return this.getByArray(i);
-    return this.getByIndex(i);
+
+  Model.prototype.getDataSet = function(key) {
+    var returnset = [];
+    if(typeof(key)==='function') {
+      console.log("getDataSet: Found function as set filter");
+      this.value.forEach(function(v,i,a) {
+        if(key(v)==true) returnset.push(v);
+      });
+    } else if(Array.isArray(key)) {
+      console.log("getDataSet: Found array as set filter");
+      while(key.length>0) {
+        var newkey = key.shift();
+        this.value.forEach(function(v,i,a) {
+          returnset.concat(v.getDataSet(newkey));
+        })
+      }
+    } else {
+      console.log("getDataSet: Found string as set filter");
+      this.value.forEach(function(v,i,a) {
+        if(v.key=key) returnset.push(v);
+      })
+    }
+    return returnset;
+  };
+
+  Model.prototype.getFilter = function(key) {
+    var filter = new Laminar.Model();
+    this.getDataSet(key).forEach(function(v) {
+      filter.add(v);
+    });
+    this.subscribe("add",function(e,o) {    // event, object
+      filter.value = [];
+      o.getDataSet(key).forEach(function(v) {
+        filter.add(v);
+      });
+    });
+    this.subscribe("delete",function(e,o) {
+      filter.value = [];
+      o.getDataSet(key).forEach(function(v) {
+        filter.add(v);
+      });
+    });
+    return filter;
   };
 
   Model.prototype.add = function(value) {
-    //console.log("New thing is a type of: " + typeof value);
     if(value instanceof Laminar.Model) {
-      //console.log("Adding new Laminar model");
       value.index = this.value.length;
       value.parent = this;
       this.setSubscription(value);
@@ -756,8 +775,7 @@ Laminar.Model = (function() {
   Model.prototype.unsubscribe = function(evnt, token) {
     for(var e in this.events[evnt]) {
       if(this.events[evnt][e].token == token) {
-        this.events[evnt].splice(e,1);
-        //delete this.events[evnt][e];
+        this.events[evnt].splice(e,1);    // Delete
         return true;
       }
     }
@@ -840,89 +858,4 @@ Laminar.Model = (function() {
   };
 
   return Model;
-})();
-
-Laminar.Filter = (function() {
-  //"use strict";
-  var defaultEvents = ["add","update","delete"];
-
-  function Filter(obj, filterfunc) {
-    //this.name = null;
-    this.obj = obj;
-    this.events = {};
-    this.eventId = -1;
-    this.filterset = null;
-    this.filterfunc = filterfunc;
-
-    for(var e in defaultEvents) {
-      obj.subscribe(defaultEvents[e],function(event,args) {
-        //debugContainer.append("<br>" + this.name + " detected an add event.");
-        this.get(defaultEvents[e]);
-      }.bind(this));
-    };
-
-    /*
-    obj.subscribe("add",function(event,args) {
-      //debugContainer.append("<br>" + this.name + " detected an add event.");
-      this.get("add");
-    }.bind(this));
-
-    obj.subscribe("update",function(event,args) {
-      //debugContainer.append("<br>" + this.name + " detected an update event.");
-      this.get("update");
-    }.bind(this));
-
-    obj.subscribe("delete",function(event,args) {
-      //debugContainer.append("<br>" + this.name + " detected a delete event.");
-      this.get("delete");
-    }.bind(this));
-    */
-  };
-
-  Filter.prototype.get = function(event) {
-    if(evnt===null || evnt===undefined) event="update";
-    if(typeof(this.filterfunc)!=='function') {
-      this.filterset = this.obj;
-    } else {
-      this.filterset = this.filterfunc(this.obj);
-    }
-    this.publish(evnt, this.filterset);
-    return this.filterset;
-  };
-
-  Filter.prototype.publish = function(evnt, args) {
-    if(!this.events[evnt]) return false;
-    var pubObject = args || this;
-    var subscribers = this.events[evnt];
-    var len = subscribers ? subscribers.length : 0;
-    while(len--) {
-      subscribers[len].publishfunction(evnt,pubObject);
-    }
-    return this;
-  };
-
-  Filter.prototype.subscribe = function(evnt, func) {
-    if (typeof(func)!=="function") return;
-    //debugContainer.append("<br>" + this.name + " registering " + evnt + " function");
-    if(!this.events[evnt]) this.events[evnt] = [];
-    var token = (++this.eventId).toString();
-    this.events[evnt].push({
-      token: token,
-      publishfunction: func
-    });
-    return token;
-  };
-
-  Filter.prototype.unsubscribe = function(token) {
-    for(var e in this.events) {
-      for(var i in this.events[e]) {
-        if(this.events[e][i].token == token) {
-          return this.events[e].splice(i,1);
-        }
-      }
-    }
-    return false;
-  };
-
-  return Filter;
 })();
