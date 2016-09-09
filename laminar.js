@@ -13,6 +13,7 @@ Laminar.Widget = (function(){
    */
   var defaultElementClass = "lm";
   var defaultElementType = "div";
+
   /**
    * Find any element in the DOM
    *
@@ -71,7 +72,8 @@ Laminar.Widget = (function(){
    * @property {object} configObj   The configuration object
    */
   function Widget(configObj) {
-    if(configObj.nodeType) {
+    configObj = configObj || {};
+    if(configObj.hasOwnProperty("nodeType")) {
       configObj = _gobble(configObj);
       _clobber(configObj);
     }
@@ -82,14 +84,9 @@ Laminar.Widget = (function(){
     this.states = [];
 
     if(configObj) {
-      if(configObj.hasOwnProperty("id")) {
-        //_clobber(configObj);
-        //if(configObj.hasOwnProperty("element")) this.element = configObj.element;
-        this.object = document.createElement(this.element);
-        if(configObj.hasOwnProperty("id")) this.set("id",configObj.id);
-      }
+      this.domElement = document.createElement(this.element);
+      if(configObj.hasOwnProperty("id")) this.set("id",configObj.id);
       if(configObj.hasOwnProperty("type")) this.set("type",configObj.type);
-      //if(configObj.hasOwnProperty("parent")) this.parent=configObj.parent;
       this.addClass(defaultElementClass);
       if(configObj.hasOwnProperty("classlist")) this.addClasses(configObj.classlist);
       if(configObj.hasOwnProperty("content")) this.content(configObj.content);
@@ -114,7 +111,7 @@ Laminar.Widget = (function(){
    */
   Widget.prototype.set = function(attrib,val) {
     if(attrib=="value" && this.element.toLowerCase()=="input") return this.setValue(val);
-    this.object.setAttribute(attrib,val);
+    this.domElement.setAttribute(attrib,val);
     return this;
   };
 
@@ -125,7 +122,7 @@ Laminar.Widget = (function(){
    * @returns {Object} The Laminar Widet object
    */
   Widget.prototype.setValue = function(val) {
-    this.object.value = val;
+    this.domElement.value = val;
     return this;
   };
 
@@ -136,8 +133,8 @@ Laminar.Widget = (function(){
    * @returns {string} The value of the HTML attribute
    */
   Widget.prototype.get = function(attrib) {
-    if(attrib=="value" && this.element.toLowerCase()=="input") return this.object.value;
-    return this.object.getAttribute(attrib);
+    if(attrib=="value" && this.element.toLowerCase()=="input") return this.domElement.value;
+    return this.domElement.getAttribute(attrib);
   };
 
   /**
@@ -158,8 +155,8 @@ Laminar.Widget = (function(){
    * @returns {Object} The Laminar Widget object
    */
   Widget.prototype.findChildren = function(selector) {
-    if(selector === null || selector === undefined) return this.object.children;
-    return this.object.querySelectorAll(selector);
+    if(selector === null || selector === undefined) return this.domElement.children;
+    return this.domElement.querySelectorAll(selector);
   };
 
   /**
@@ -170,7 +167,7 @@ Laminar.Widget = (function(){
    * @returns {Object} This removed Laminar Widget object
    */
   Widget.prototype.remove = function() {
-    return this.object.parentNode.removeChild(this.object);
+    return this.domElement.parentNode.removeChild(this.domElement);
   };
 
   /**
@@ -180,7 +177,7 @@ Laminar.Widget = (function(){
    * @returns {Object} The Laminar widget
    */
   Widget.prototype.removeChild = function(childSelector) {
-    this.object.removeChild(this.find(childSelector));
+    this.domElement.removeChild(this.find(childSelector));
     return this;
   };
 
@@ -210,7 +207,7 @@ Laminar.Widget = (function(){
    * @returns {string} The property value
    */
   Widget.prototype.getProp = function(prop) {
-    return this.object[prop] || false;
+    return this.domElement[prop] || false;
   };
 
   Widget.prototype.getAttributes = function() {
@@ -239,7 +236,7 @@ Laminar.Widget = (function(){
    * @returns {number} The pixels of the left side of the widget
    */
   Widget.prototype.getLeft = function() {
-    return this.object.offsetLeft;
+    return this.domElement.offsetLeft;
   };
   /**
    * Return the position of the TOP side of this widget
@@ -247,7 +244,7 @@ Laminar.Widget = (function(){
    * @returns {number} The pixels of the top side of the widget
    */
   Widget.prototype.getTop = function() {
-    return this.object.offsetTop;
+    return this.domElement.offsetTop;
   };
   /**
    * Return the position of this widget (left,top)
@@ -258,10 +255,10 @@ Laminar.Widget = (function(){
     return {left: this.getLeft(), top: this.getTop()}
   };
   Widget.prototype.getHeight = function() {
-    return this.object.offsetHeight;
+    return this.domElement.offsetHeight;
   };
   Widget.prototype.getWidth = function() {
-    return this.object.offsetWidth;
+    return this.domElement.offsetWidth;
   };
   /**
    * Remove a class from the widget's classlist
@@ -270,7 +267,7 @@ Laminar.Widget = (function(){
    * @return {Object}  This Laminar widget
    */
   Widget.prototype.removeClass = function(classname) {
-    this.object.classList.remove(classname);
+    this.domElement.classList.remove(classname);
     return this;
   };
   /**
@@ -279,10 +276,10 @@ Laminar.Widget = (function(){
    * @param {string} classname - the class name to add
    */
   Widget.prototype.addClass = function(classname) {
-    if (this.object.classList) {
-      this.object.classList.add(classname);
+    if (this.domElement.classList) {
+      this.domElement.classList.add(classname);
     } else {
-      this.object.classname += ' ' + classname;
+      this.domElement.classname += ' ' + classname;
     }
     return this;
   };
@@ -349,11 +346,11 @@ Laminar.Widget = (function(){
    * @returns {String}  The name of the class or 'false'
    */
   Widget.prototype.hasClass = function(classname) {
-    if(this.object.classList) return this.object.classList.contains(classname);
+    if(this.domElement.classList) return this.domElement.classList.contains(classname);
     return false;
   };
   Widget.prototype.toggleClass = function(classname) {
-    this.object.classList.toggle(classname);
+    this.domElement.classList.toggle(classname);
     return this;
   };
 
@@ -365,7 +362,7 @@ Laminar.Widget = (function(){
    * @return {Object} This Laminar Widget object
    */
   Widget.prototype.css = function(prop,val) {
-    this.object.style[prop] = val;
+    this.domElement.style[prop] = val;
     return this;
   };
   /** Hide element in the DOM */
@@ -385,7 +382,7 @@ Laminar.Widget = (function(){
    * @returns {Object}   The Waminar widget
    */
   Widget.prototype.after = function(content) {
-    this.object.insertAdjacentHTML('afterend',content);
+    this.domElement.insertAdjacentHTML('afterend',content);
     return this;
   };
   /**
@@ -395,7 +392,7 @@ Laminar.Widget = (function(){
    * @returns {Object}   The Laminar widget
    */
   Widget.prototype.prepend = function(content) {
-    this.object.insertAdjacentHTML('afterbegin',content);
+    this.domElement.insertAdjacentHTML('afterbegin',content);
     return this;
   };
   /**
@@ -405,7 +402,7 @@ Laminar.Widget = (function(){
    * @returns {Object}    The Laminar widget
    */
   Widget.prototype.append = function(content) {
-    this.object.insertAdjacentHTML("beforeend",content);
+    this.domElement.insertAdjacentHTML("beforeend",content);
     return this;
   };
   /**
@@ -415,7 +412,7 @@ Laminar.Widget = (function(){
    * @returns {Object}    The Laminar widget
    */
   Widget.prototype.before = function(content) {
-    this.object.insertAdjacentHTML('beforebegin',content);
+    this.domElement.insertAdjacentHTML('beforebegin',content);
     return this;
   };
   /**
@@ -424,7 +421,7 @@ Laminar.Widget = (function(){
    * @returns {HTMLCollection}  Child elements of this node
    */
   Widget.prototype.children = function() {
-    return this.object.children;
+    return this.domElement.children;
   };
   /**
    * Clears the contents of the widget.
@@ -435,9 +432,9 @@ Laminar.Widget = (function(){
    */
   Widget.prototype.empty = function() {
     if(this.element.toLowerCase()=="input") {
-      this.object.value = '';
+      this.domElement.value = '';
     } else {
-      this.object.innerHTML = '';
+      this.domElement.innerHTML = '';
     }
     return this;
   };
@@ -455,10 +452,10 @@ Laminar.Widget = (function(){
     if(Array.isArray(content)) {
       for(var i=0;i<content.length;i++) this.content(content[i]);
     } else if(content instanceof Laminar.Widget) {
-      content.parent = this.object.id;
-      this.object.appendChild(content.object);
+      content.parent = this.domElement.id;
+      this.domElement.appendChild(content.domElement);
     } else {
-      this.object.insertAdjacentHTML("beforeend",content);
+      this.domElement.insertAdjacentHTML("beforeend",content);
     }
     return this;
   };
@@ -470,8 +467,8 @@ Laminar.Widget = (function(){
    * @returns {Object} The Laminar widget or the HTML content
    */
   Widget.prototype.html = function(content) {
-    if(content === null || content === undefined) return this.object.innerHTML;
-    this.object.innerHTML = content;
+    if(content === null || content === undefined) return this.domElement.innerHTML;
+    this.domElement.innerHTML = content;
     return this;
   };
 
@@ -483,7 +480,7 @@ Laminar.Widget = (function(){
   Widget.prototype.update = function() {
     if(this.parent!==null) {
       var foundObject = _findElement(this.parent);
-      if(foundObject) foundObject.appendChild(this.object);
+      if(foundObject) foundObject.appendChild(this.domElement);
     }
     return this;
   }
@@ -491,7 +488,7 @@ Laminar.Widget = (function(){
   Widget.prototype.setEvent = function(e, func) {
     if(typeof(func)!=="function") return this;
     this.events[e] = func;
-    this.object.addEventListener(e,function(e){
+    this.domElement.addEventListener(e,function(e){
       this.events[e.type](e, this);
     }.bind(this));
     return this;

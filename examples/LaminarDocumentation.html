@@ -583,7 +583,7 @@
   objects:</p>
 <h3>Progress</h3>
 <script>
-  progressObject = Laminar.Widget({
+  progressObject = new Laminar.Widget({
     id:"progress",
     contents:"I am a state object",
     value:10,
@@ -594,7 +594,7 @@
   progressObject.set("max",100);
 
 
-  xyzElement.find().style["border"] = "1px solid red";
+  //xyzElement.find().style["border"] = "1px solid red";
 </script>
 </section>
 </body>
