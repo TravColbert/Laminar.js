@@ -48,8 +48,10 @@ Laminar.Widget = (function(){
 
   var _gobble = function(domObj) {
     var attributeList = domObj.attributes;
+    //console.log("Gobbling element with the following attribs: " + JSON.stringify(attributeList));
     var widgetConfigObj = {};
     for(var count=0;count<attributeList.length;count++) {
+      //console.log("Attrib: " + attributeList[count].name + " = " + attributeList[count].value);
       widgetConfigObj[attributeList[count]["name"]] = attributeList[count]["value"];
     }
     widgetConfigObj["element"] = domObj["tagName"];
@@ -73,8 +75,11 @@ Laminar.Widget = (function(){
    */
   function Widget(configObj) {
     configObj = configObj || {};
-    if(configObj.hasOwnProperty("nodeType")) {
+    if(configObj.nodeType) {    // Its a DOM object
       configObj = _gobble(configObj);
+      _clobber(configObj);
+    } else if(typeof configObj=="string")  {
+      configObj = _gobble(_findElement(configObj));
       _clobber(configObj);
     }
     this.element = configObj.element || defaultElementType;
@@ -245,6 +250,10 @@ Laminar.Widget = (function(){
    */
   Widget.prototype.getTop = function() {
     return this.domElement.offsetTop;
+  };
+
+  Widget.prototype.getScrollTop = function() {
+    return this.domElement.scrollTop;
   };
   /**
    * Return the position of this widget (left,top)
