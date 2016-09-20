@@ -97,6 +97,7 @@ Laminar.Widget = (function(){
       if(configObj.hasOwnProperty("content")) this.content(configObj.content);
       if(configObj.hasOwnProperty("value")) this.set("value",configObj.value);
       if(configObj.hasOwnProperty("proplist")) this.setProps(configObj["proplist"]);
+      if(configObj.hasOwnProperty("datalist")) this.setDataList(configObj["datalist"]);
       if(configObj.hasOwnProperty("states")) {
         this.states = configObj["states"];
         this.setState();
@@ -142,6 +143,32 @@ Laminar.Widget = (function(){
     return this.domElement.getAttribute(attrib);
   };
 
+  /**
+   * Get the dataset attribute
+   *
+   * These are data-___ attributes that are handled specially in HTML5
+   *
+   * @param {string} attrib The dataset attribute
+   * @returns {string} The value of the dataset attribute
+   */
+  Widget.prototype.getData = function(attrib) {
+    //if(!attrib || attrib==null || !this.domElement.dataset.hasOwnProperty(attrib)) return false;
+    return this.domElement.dataset[attrib];
+  };
+
+  Widget.prototype.setDataList = function(dataList) {
+    dataList.forEach(function(v,i,a) {
+      this.setData(v);
+    })
+  };
+
+  Widget.prototype.setData = function(attrib,value) {
+    if(Array.isArray(attrib)) {
+      //this.setData()
+    }
+    this.domElement.dataset[attrib] = value;
+    return this;
+  };
   /**
    * Get the value of an HTML input
    *

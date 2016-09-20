@@ -496,6 +496,24 @@
   shiftyElement.setEvent("transitionend",updateSize);
 </pre>
 
+<h2>HTML5 Data Attributes</h2>
+<p class="documentation">HTML5 introduced data attributes. These were a nice
+provision to store extra data in an element in a standard way. This is done by
+using <em>data attributes</em>.</p>.
+<p class="documentation">Laminar objects work well with these data attributes.
+You can either define data attributes or programatically assign data attributes.
+Here's how:</p>
+<pre>
+  oneAttributeElement = new Laminar.Widget({
+    id:"attributeelement",
+    content:"Something to say",
+    classlist:["demo","other","classes"],
+    parent:".content",
+    data:[["location","New York"],["population","8,406,000"]]
+  }).update();
+
+</pre>
+
 <h2>State Objects</h2>
 <p class="documentation">Related to classes are states. This is a little
   different from classes. Classes may be arbitrarily added and removed.
