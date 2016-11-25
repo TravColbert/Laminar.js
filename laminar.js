@@ -97,13 +97,13 @@ Laminar.Widget = (function(){
       if(configObj.hasOwnProperty("content")) this.content(configObj.content);
       if(configObj.hasOwnProperty("value")) this.set("value",configObj.value);
       if(configObj.hasOwnProperty("proplist")) this.setProps(configObj["proplist"]);
-      if(configObj.hasOwnProperty("datalist")) this.setDataList(configObj["datalist"]);
-      if(configObj.hasOwnProperty("states")) {
-        this.states = configObj["states"];
+      if(configObj.hasOwnProperty("datalist")) this.setData(configObj["datalist"]);
+      if(configObj.hasOwnProperty("statelist")) {
+        this.states = configObj["statelist"];
         this.setState();
       }
     }
-  };
+  }
 
   /**
    * Set or add an HTML attribute.
@@ -156,19 +156,25 @@ Laminar.Widget = (function(){
     return this.domElement.dataset[attrib];
   };
 
-  Widget.prototype.setDataList = function(dataList) {
-    dataList.forEach(function(v,i,a) {
-      this.setData(v);
-    })
+  Widget.prototype.setData = function(dataList) {
+    for(var key in dataList) {
+      if(dataList.hasOwnProperty(key)) {
+        console.log("Setting key: " + key + " to: " + dataList[key]);
+        this.domElement.dataset[key] = dataList[key];
+      }
+    }
   };
 
+/*
   Widget.prototype.setData = function(attrib,value) {
+    console.log("Setting data: " + attrib + " to: " + value);
     if(Array.isArray(attrib)) {
-      //this.setData()
+      this.setDataList(attrib);
     }
     this.domElement.dataset[attrib] = value;
     return this;
   };
+*/
   /**
    * Get the value of an HTML input
    *
@@ -350,12 +356,15 @@ Laminar.Widget = (function(){
         if(i!=statePosition) this.removeClass(this.states[i]);
       }
     }
+
+    this.dispatchEvent("statechange");
+
     return this;
   }
 
   Widget.prototype.setNextState = function() {
     var statePosition = this.states.indexOf(this.getState());
-    if(++statePosition==this.states.length) statePosition=0;
+    if(++statePosition>=this.states.length) statePosition=0;
     this.setState(this.states[statePosition]);
     return this;
   }
@@ -521,21 +530,42 @@ Laminar.Widget = (function(){
     return this;
   }
 
-  Widget.prototype.setEvent = function(e, func) {
+  /**
+   * Events, Subscriptions and Publishing
+   **/
+
+  Widget.prototype.dispatchEvent = function(eventName) {
+    console.log("Dispatching event: " + eventName);
+    var event = new Event(eventName, {
+      bubbles:true
+    });
+    this.domElement.dispatchEvent(event);
+  };
+
+  Widget.prototype.listenEvent = function(eventName, func) {
     if(typeof(func)!=="function") return this;
-    this.events[e] = func;
-    this.domElement.addEventListener(e,function(e){
+    this.domElement.addEventListener(eventName, function(e) {
+      console.log("Event fired: " + e.type);
+      func(e, this);
+    }.bind(this));
+  };
+
+  /*
+  Widget.prototype.setEvent = function(event, func) {
+    if(typeof(func)!=="function") return this;
+    this.events[event] = func;
+    this.domElement.addEventListener(event,function(e){
+      console.log("Event fired: " + e.type);
       this.events[e.type](e, this);
     }.bind(this));
     return this;
   };
+  */
 
   Widget.prototype.subscribe = function(obj,evnt,func) {
     var setSubscribe = function(obj,evnt,func) {
       var token = obj.subscribe(evnt,func);
-      if(token) {
-        return {event:evnt, token:token, obj:obj};
-      }
+      if(token) return {event:evnt, token:token, obj:obj};
     }
 
     if(Array.isArray(evnt)) {
@@ -577,7 +607,7 @@ Laminar.Model = (function() {
     var keys = ["key","value"];
     for(var key in keys) {
       if(!obj.hasOwnProperty(keys[key])) return false;
-    };
+    }
     return true;
   }
 
@@ -588,7 +618,7 @@ Laminar.Model = (function() {
       if(k.hasOwnProperty("type")) t = k.type;
       v = k.value;
       k = k.key;
-    };
+    }
     this.value = [];
     this.events = {};
     this.eventId = -1;
@@ -597,7 +627,7 @@ Laminar.Model = (function() {
     this.setIndex(i);
     this.setValue(v);
     this.setType(t);
-  };
+  }
 
   Model.prototype.setIndex = function(i) {
     return this.index = i || defaultIndex;

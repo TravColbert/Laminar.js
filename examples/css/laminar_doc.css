@@ -14,7 +14,7 @@
   font-family: 'Open Sans Condensed', sans-serif;
 }
 .shadowedtext {
-  text-shadow: 0px 0px 0.4px #c0c0c0;
+  text-shadow: 0px 0px 2px #c0c0c0;
 }
 /***
  * BOX MODEL & LAYOUT
@@ -74,7 +74,7 @@ nav.top a {
   padding: 0 15px;
 }
 .menu-items li:hover {
-  background-color: #ef9b7c;
+  background-color: #e94609;
 }
 .show,
 .hide {
@@ -140,7 +140,7 @@ body {
   font-size: 1.1em;
   color: #3d3b30;
   font-family: 'Open Sans Condensed', sans-serif;
-  text-shadow: 0px 0px 0.4px #c0c0c0;
+  text-shadow: 0px 0px 2px #c0c0c0;
   background-color: #fcfcfc;
   margin: 0px;
   margin-top: 40px;
@@ -160,7 +160,7 @@ nav.top {
   position: relative;
   width: 100%;
   text-align: center;
-  background: #ef9b7c url(../assets/bg3.jpg) no-repeat center center fixed;
+  background: #e94609 url(../assets/bg3.jpg) no-repeat center center fixed;
   background-size: cover;
   padding-bottom: 30px;
 }
@@ -208,7 +208,7 @@ h6 {
   font-family: 'Montserrat', sans-serif;
   color: #8491a3;
   background-color: none;
-  text-shadow: 0px 0px 0.4px #c0c0c0;
+  text-shadow: 0px 0px 2px #c0c0c0;
 }
 h2 {
   border-bottom: 2px solid #8491a3;
@@ -251,16 +251,16 @@ progress {
   font-family: 'Montserrat', sans-serif;
   color: #4d5061;
   background-color: #D8C99B;
-  text-shadow: 0px 0px 0.4px #c0c0c0;
+  text-shadow: 0px 0px 2px #c0c0c0;
 }
 .urgent {
   font-weight: bold;
-  color: #ef9b7c;
+  color: #e94609;
   background-color: #D8C99B;
 }
 .status {
   color: #4d5061;
-  background-color: #fff05a;
+  background-color: #f4f1d1;
 }
 .caption {
   font-size: .8em;
@@ -272,5 +272,5 @@ progress {
 #cobject {
   color: #fcfcfc;
   background-color: #8491a3;
-  text-shadow: 0px 0px 0.4px #c0c0c0;
+  text-shadow: 0px 0px 2px #c0c0c0;
 }

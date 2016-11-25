@@ -388,7 +388,7 @@
 <p class="documentation">We can also programatically manipulate CSS styles
   directly:</p>
 <pre>
-  fifthElement.css("color","#fff05a");
+  fifthElement.css("color","#e94609");
 </pre>
 <script>
   holderDiv7 = new Laminar.Widget({
@@ -407,7 +407,7 @@
 
   setInterval(function() {
     if(seventhElement.get("value") == 1) {
-      seventhElement.css("color","#fff05a");
+      seventhElement.css("color","#e94609");
       seventhElement.set("value",0);
     } else {
       seventhElement.css("color","inherit");
@@ -418,22 +418,28 @@
 
 <h2>Events</h2>
 <p class="documentation">You can tell an Laminar object what to do when it senses
-  an event. We use the 'setEvent' method:</p>
+  an event. We use the <em>listenEvent()</em> method:</p>
 <pre>
-  LaminarObject.setEvent(event,function);
+  LaminarObject.listenEvent(event,function);
 </pre>
-<p class="documentation">We decided to get a little <i>shifty</i> with the below
-  element by adding a function that reacts to a "click" event:</p>
+<p class="documentation">The <em>listenEvent()</em> method expects an <i>event</i>,
+and a <i>function</i> that is called when the event is fired.</p>
+<p class="documentation">The <i>function</i> should be written to accept two
+parameters: the <i>event object</i> (commonly noted as '<i>e</i>'), and the
+Laminar object that caught the event. Take the example below. In this example,
+we decided to get a little <i>evasive</i> by adding a function called
+<i>trigger()</i> that is called when a "click" event is caught by the Laminar
+button widget we're going to create:</p>
 <pre>
   var trigger = function(e, obj) {
     obj.toggleClass("right");
   }
 
-  shiftyElement.setEvent("click",trigger);
+  shiftyElement.listenEvent("click",trigger);
 </pre>
-<p class="documentation">You see how we created a function called "trigger",
-  then we told our Laminar object to execute that function when it is clicked.</p>
-<p class="documentation">Try it!:</p>
+<p class="documentation">See how we created a function, then we told our Laminar
+object to execute that function when it is clicked?</p>
+<p class="documentation">Try clicking it:</p>
 <script>
   shiftyElement = new Laminar.Widget({
     id:"shiftyelement",
@@ -449,19 +455,16 @@
     obj.toggleClass("right");
   }
 
-  shiftyElement.setEvent("click",trigger);
+  shiftyElement.listenEvent("click",trigger);
 </script>
 <p class="documentation">The "trigger" function simply toggles a class that
   positions the element. Every time you click the element, the trigger function
   is fired and the class is toggled on and off.</p>
-<p class="documentation">You can see that the event that the Laminar object will
-  call should receive two parameters: a string representing the event, and the
-  Laminar object itself.</p>
 
 <h2>Dimensions & Position</h2>
 <p class="documentation">Sometimes you need to know the dimensions and
   positioning of your Laminar objects. You can ask any Laminar object where it
-  exists in the universe using getTop(), getLeft(), or getPosition().</p>
+  exists in the universe using <em>getTop()</em>, <em>getLeft()</em>, or <em>getPosition()</em>.</p>
 <script>
   locatorElement = new Laminar.Widget({
     id:"locatorelement",
@@ -475,7 +478,7 @@
     locatorElement.content("shiftyElement is: " + obj.getLeft() + "(x) " + obj.getTop() + "(y) " + obj.getHeight() + "(h) " + obj.getWidth() + "(w)")
   }
 
-  shiftyElement.setEvent("transitionend",updateSize);
+  shiftyElement.listenEvent("transitionend",updateSize);
 </script>
 <p class="documentation">You may have noticed that this Laminar object changes
   when the previous Laminar object (called "shifty") moves. This is another
@@ -493,26 +496,71 @@
     locatorElement.content("shiftyElement is: " + obj.getLeft() + "(x) " + obj.getTop() + "(y) " + obj.getHeight() + "(h) " + obj.getWidth() + "(w)")
   }
 
-  shiftyElement.setEvent("transitionend",updateSize);
+  shiftyElement.listenEvent("transitionend",updateSize);
 </pre>
+<p class="documentation">You might use this ability to implement responsiveness
+ right into the Laminar objects themselves. Let's make an element that
+ recomposes itself based on its width.</p>
+<script>
+  responsiveElement = new Laminar.Widget({
+    id:"responsiveelement",
+    content:"This is a responsive element.",
+    classlist:["demo"],
+    parent:".content"
+  }).update();
+
+  responsiveElement.listenEvent("click",function() {
+    console.log("Something lost focus");
+  });
+  //responsiveElement.listenEvent("resize",);
+</script>
 
 <h2>HTML5 Data Attributes</h2>
-<p class="documentation">HTML5 introduced data attributes. These were a nice
-provision to store extra data in an element in a standard way. This is done by
-using <em>data attributes</em>.</p>.
+<p class="documentation">HTML5 introduced <em>data attributes</em>. These were a nice
+provision to store extra data in an element in a standard way.</p>
 <p class="documentation">Laminar objects work well with these data attributes.
 You can either define data attributes or programatically assign data attributes.
 Here's how:</p>
 <pre>
   oneAttributeElement = new Laminar.Widget({
     id:"attributeelement",
-    content:"Something to say",
+    content:"This element has data",
     classlist:["demo","other","classes"],
     parent:".content",
-    data:[["location","New York"],["population","8,406,000"]]
+    datalist:{location:"New York",population:"8,406,000"}
   }).update();
-
 </pre>
+<p class="documentation">You see how we passed a JSON object to Laminar in the
+datalist attribute? That object should contain the keys and values for the data
+that you wish to embed in your DOM element.</p>
+<p class="documentation">The result looks like this:</p>
+<script>
+  oneAttributeElement = new Laminar.Widget({
+    id:"attributeelement",
+    content:"This element has data",
+    classlist:["demo"],
+    parent:".content",
+    datalist:{location:"New York",population:"8,406,000"}
+  }).update();
+</script>
+<p class="documentation">Of course, what really matters is what the HTML looks
+like:</p>
+<pre>
+  &ltdiv id="attributeelement" class="lm demo" data-location="New York" data-population="8,406,000"&gtThis element has data&lt/div&gt
+</pre>
+<p class="documentation">Laminar adds the 'data-' prefix to your datalist keys
+to make them legal data attributes in HTML5.</p>
+<p class="documentation">You're also free to add data attributes
+programmatically by using the <em>setData()</em> method of the Laminar widget:</p>
+<pre>
+  oneAttributeElement.setData({nickname:"The Big Apple"});
+</pre>
+<p class="documentation">The new data attribute will be added to the Laminar
+object.</p>
+<p class="documentation">Naturally, Laminar provides an easy, programatic way of
+<i>reading</i> data attributes too. Simply use the <em>getData()</em> method. Pass
+the attribute name (minus the 'data' part) to the <em>getData()</em> method of the
+Laminar object to see what it is set to.</p>
 
 <h2>State Objects</h2>
 <p class="documentation">Related to classes are states. This is a little
@@ -534,19 +582,23 @@ Here's how:</p>
 
   stateElement = new Laminar.Widget({
     id:"astateelement",
-    contents:"I am a state object",
+    content:"I am a state object",
     // value:"",
     element:"input",
     type:"button",
-    states:["on","off","idle"],
+    statelist:["on","off","idle"],
     parent:"#holderdiv8"
   }).update();
 
   stateElement.set("value",stateElement.getState());
-  stateElement.setEvent("click",function(e, obj) {
+  stateElement.listenEvent("click",function(e, obj) {
     obj.setNextState();
     obj.set("value",obj.getState());
   })
+
+  holderDiv8.listenEvent("statechange",function(e) {
+    console.log("Some other element changed state");
+  });
 </script>
 
 <p class="documentation">State objects build upon base objects by adding
@@ -555,18 +607,18 @@ Here's how:</p>
   states of this Laminar object. We've defined what all the possible states of
   this object are like this:</p>
 <pre>
-  stateElement = AppkitStateObject({
+  stateElement = new Laminar.Widget({
     id:"astateelement",
     content:"I am a state object",
     element:"input",
     type:"button",
-    states:["on","off","idle"],
-    parent:".content"
-  });
+    statelist:["on","off","idle"],
+    parent:"#holderdiv8"
+  }).update();
 </pre>
 <p class="documentation">You see that we gave 'stateElement' a list of all of
   the states that it can possibly be in ("on", "off", "idle"). The property that
-  defines these possible states is called 'states'.</p>
+  defines these possible states is called <em>statelist</em>.</p>
 <p class="documentation">Notice that we've alse not given this object a value
   (buttons usually display thier 'value' attribute). Instead, we set the value
   of this object after it has been created by using the <em>set()</em> method -
@@ -582,7 +634,7 @@ Here's how:</p>
   // When clicked, invoke this anonymous function which
   // 1. Sets the next state
   // 2. Sets the 'value' to the new state thereby showing the state on the button face
-  stateElement.setEvent("click",function(e, obj) {
+  stateElement.listenEvent("click",function(e, obj) {
     obj.setNextState();
     obj.set("value",obj.getState());
   })
