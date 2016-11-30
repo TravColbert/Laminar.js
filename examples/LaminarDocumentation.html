@@ -502,19 +502,33 @@ object to execute that function when it is clicked?</p>
  right into the Laminar objects themselves. Let's make an element that
  recomposes itself based on its width.</p>
 <script>
-  responsiveElement = new Laminar.Widget({
-    id:"responsiveelement",
-    content:"This is a responsive element.",
-    classlist:["demo"],
-    parent:".content"
-  }).update();
-
-  responsiveElement.listenEvent("click",function() {
-    console.log("Something lost focus");
-  });
-  //responsiveElement.listenEvent("resize",);
+  var longText = 'This is a DIV that responds to changes in page width. This element will change its contents depending on what its width is'
+  var checkWidth = function(thisObj) {
+    var dimension = thisObj.getDimensions();
+    if(dimension.width<200) {
+      thisObj.setState('wtiny');
+      thisObj.html("DIV");
+    } else if(dimension.width<400) {
+      thisObj.setState('wsmall');
+      thisObj.html("Responsive DIV");
+    } else if(dimension.width<600) {
+      thisObj.setState('wmed');
+      thisObj.html('This is a Responsive DIV');
+    } else {
+      thisObj.setState('wfull');
+      thisObj.html(longText);
+    }
+  };
+  var responsiveDiv = new Laminar.Widget({
+    id:'responsivediv',
+    content:longText,
+    classlist:["demo","responsive"],
+    statelist:["wfull","wmed","wsmall","wtiny"],
+    parent:".content",
+    responsive:checkWidth
+  }).update(checkWidth);
 </script>
-
+<p class="documentation">The above Laminar box will react as you resize the window.</p>
 <h2>HTML5 Data Attributes</h2>
 <p class="documentation">HTML5 introduced <em>data attributes</em>. These were a nice
 provision to store extra data in an element in a standard way.</p>

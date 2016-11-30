@@ -87,6 +87,15 @@ Laminar.Widget = (function(){
     this.events = {};
     this.subscriptions = [];
     this.states = [];
+    this.mutations = new MutationObserver(function(mutation) {
+      for(var m in mutation) {
+        if(mutation.hasOwnProperty(m)) {
+          console.log("Mutation: '" + mutation[m].attributeName + "' occurred");
+          console.log("Target: '" + mutation[m].target.tagName + "'");
+          console.log(JSON.stringify(mutation[m]));
+        }
+      }
+    })
 
     if(configObj) {
       this.domElement = document.createElement(this.element);
@@ -102,7 +111,17 @@ Laminar.Widget = (function(){
         this.states = configObj["statelist"];
         this.setState();
       }
+      if(configObj.hasOwnProperty("responsive")) {
+        if(typeof configObj.responsive == "function") {
+          this.responsive = configObj.responsive;
+          window.addEventListener("resize",function(){
+            this.responsive(this);
+          }.bind(this));
+        }
+      }
     }
+
+    this.mutations.observe(this.domElement, {attributes: true});
   }
 
   /**
@@ -296,12 +315,19 @@ Laminar.Widget = (function(){
   Widget.prototype.getPosition = function() {
     return {left: this.getLeft(), top: this.getTop()}
   };
+
+  Widget.prototype.getDimensions = function() {
+    return {height: this.getHeight(), width: this.getWidth()};
+  };
+
   Widget.prototype.getHeight = function() {
     return this.domElement.offsetHeight;
   };
+
   Widget.prototype.getWidth = function() {
     return this.domElement.offsetWidth;
   };
+
   /**
    * Remove a class from the widget's classlist
    *
@@ -522,10 +548,16 @@ Laminar.Widget = (function(){
    *
    * @returns {Object} This Laminar widget
    */
-  Widget.prototype.update = function() {
+  Widget.prototype.update = function(func) {
     if(this.parent!==null) {
       var foundObject = _findElement(this.parent);
-      if(foundObject) foundObject.appendChild(this.domElement);
+      if(foundObject) {
+        foundObject.appendChild(this.domElement);
+        if(typeof func === "function") {
+          console.log("Invoking init function");
+          func(this);
+        }
+      }
     }
     return this;
   }

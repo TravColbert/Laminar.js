@@ -253,6 +253,20 @@ progress {
   background-color: #D8C99B;
   text-shadow: 0px 0px 2px #c0c0c0;
 }
+.demo.wfull {
+  background-color: #F79F79;
+}
+.demo.wmed {
+  background-color: #93B7BE;
+}
+.demo.wsmall {
+  background-color: #A5B452;
+}
+.demo.responsive {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .urgent {
   font-weight: bold;
   color: #e94609;

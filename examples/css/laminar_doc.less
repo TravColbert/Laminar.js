@@ -10,10 +10,14 @@
 @laminarblue: #4d5061;
 @laminarlightblue: #8491a3;
 @laminarred: #e94609;
-@laminarbrown: #D8C99B;
+@laminartan: #D8C99B;
 @laminaryellow: #f4f1d1;
 @laminarwhite: #fcfcfc;
 @laminarshadow: #c0c0c0;
+
+@laminargreen: #A5B452;
+@laminarocean: #93B7BE;
+@laminarcoral: #F79F79;
 
 @menuforegroundcolor: @laminarwhite;
 @menubackgroundcolor: @laminarlightblue;
@@ -31,10 +35,10 @@
 @invertedbackgroundcolor: @laminargray;
 
 @urgentforegroundcolor: @laminarred;
-@urgentbackgroundcolor: @laminarbrown;
+@urgentbackgroundcolor: @laminartan;
 
 @demoforegroundcolor: @laminarblue;
-@demobackgroundcolor: @laminarbrown;
+@demobackgroundcolor: @laminartan;
 
 @statusforegroundcolor: @laminarblue;
 @statusbackgroundcolor: @laminaryellow;
@@ -290,6 +294,20 @@ progress {
   color: @demoforegroundcolor;
   background-color: @demobackgroundcolor;
   .shadowedtext
+}
+.demo.wfull {
+  background-color: @laminarcoral;
+}
+.demo.wmed {
+  background-color: @laminarocean;
+}
+.demo.wsmall {
+  background-color: @laminargreen;
+}
+.demo.responsive {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .urgent {
   font-weight: bold;
