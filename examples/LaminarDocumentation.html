@@ -147,7 +147,7 @@
   make them easier to see. By default, Laminar objects do not come with the demo
   class attached.</p>
 <p class="documentation">You can see that we define a Laminar widget by giving the
-  Laminar.Widget constructor a little object that looks like this:</p>
+  Laminar.Widget constructor some JSON that looks like this:</p>
 <pre>
   {
     id:"firstelement",
@@ -157,7 +157,7 @@
   }
 </pre>
 <p class="documentation">After passing-in the configuration object to the constructor
-  we call the widget's <em>update()</em> method with places the widget in the DOM.</p>
+  we call the widget's <em>update()</em> method which places the widget in the DOM.</p>
 <p class="documentation">This made an element in this web page (in the element with the
   <em>content</em> class that looks like this behind the scenes:</p>
 <pre>
@@ -165,7 +165,7 @@
 </pre>
 <p class="documentation">You see where all of the elements in the DOM object
   come from. The only one that we didn't specify was the class attribute of
-  <em>lm</em>. Every Laminar object gets the <em>lm</em> class (and others like it).</p>
+  <em>lm</em>. Every Laminar object gets the <em>lm</em> class.</p>
 
 <h2>Parent</h2>
 <p class="documentation">The <em>parent</em> property (above) says <em>.content</em>. This
@@ -255,7 +255,7 @@
   }).update();
 </script>
 <p class="documentation">This button doesn't do anything yet, but at least it is
-  there. Later we will learn how to make any Laminar object do something.</p>
+  there. Later we will learn how to make our Laminar objects do something.</p>
 <p class="documentation">We created this Laminar object like this:</p>
 <pre>
   buttonElement = new Laminar.Widget({
@@ -269,7 +269,8 @@
 </pre>
 <p class="documentation">See how we have added a <em>type</em> and <em>value</em>
   property to our Laminar object? Also, note that we told the button that its
-  parent container was <em>#buttonholder</em>. Parents can be ids or classes.</p>
+  parent container was <em>#buttonholder</em>. Parents can be any valid CSS
+  selector. Naturally, it should return just one DOM container object.</p>
 <p class="documentation">Simply changing the <em>type</em> to <i>"textinput"</i> makes the
   object render like this:</p>
 <script>
@@ -310,6 +311,64 @@
   method to change the type setting to something else.</p>
 <p class="documentation">There's no need to add any fancy add-on libraries to
   manipulate Laminar objects. It's all built-in to each one of them.</p>
+
+<h2>Pre-existing Elements</h2>
+<p class="documentation">We've created brand-new DOM elements using Laminar.
+  However, we can also turn normal DOM elements into powerful Laminar objects!</p>
+<p class="documentation">Let's turn this garden-variety button...</p>
+<pre>
+  &lt;div id="custombuttonholder" class="demo"&gt;
+    &lt;input type="button" id="abutton" value="Typical Button"&gt;
+  &lt;/div&gt;
+</pre>
+<p class="documentation">...into a Laminar button.</p>
+<p class="documentation">We do this by referencing the pre-existing DOM object
+  when we create the Laminar object. Like this:</p>
+<pre>
+  var customLaminarButton = new Laminar.Widget(document.getElementById("abutton")).update();
+</pre>
+<p class="documentation">Notice how we simply gave the Laminar widget
+  constructor the DOM element? We did that by using HTML5's <em>getElementById()</em>
+  function. Laminar 'gobbles' up this DOM object and turns it into a Laminar
+  object with all of Laminar's abilities baked-in.</p>
+<div id="custombuttonholder" class="demo">
+  <input type="button" id="abutton" value="Typical Button">
+</div>
+<script>
+  var customLaminarButton = new Laminar.Widget(document.getElementById("abutton")).update();
+</script>
+<p class="documentation">The result is a Laminar object that we can refer to by
+  the name: <b>customLaminarButton</b>. If you open your browser's developer
+  tools (by pressing F12, Ctrl-I or something like that) you can
+  programmatically modify this little button. Try changing the background color
+  of the button like this:</p>
+<pre>
+  customLaminarButton.css("background-color","lightgreen");
+</pre>
+<p class="documentation">You will probably even notice that as you type the new
+  Lamainar button your browser will start to complete the typing for you. It may
+  even list the methods that bundled into your new Laminar button.</p>
+<p class="documentation">Don't worry. Your shiny new Laminar object will still
+  contain all of its original child elements:</p>
+<div id="testlistholder" class="demo">
+  <div id="testlist">
+    <p>Breakfast menu:</p>
+    <ol>
+      <li>Eggs</li>
+      <li>Bacon</li>
+      <li>Bagels</li>
+    </ol>
+    <p>Beverages:</p>
+    <form>
+      <input type="radio" name="beverage" value="coffee" checked> Coffee<br>
+      <input type="radio" name="beverage" value="tea"> Tea<br>
+      <input type="radio" name="beverage" value="juice"> Juice
+    </form>
+  </div>
+</div>
+<script>
+  var testList = new Laminar.Widget(document.getElementById("testlist")).update();
+</script>
 
 <h2>Classes</h2>
 <p class="documentation">Now let us try creating an object and giving it a class.</p>
@@ -578,15 +637,14 @@ Laminar object to see what it is set to.</p>
 
 <h2>State Objects</h2>
 <p class="documentation">Related to classes are states. This is a little
-  different from classes. Classes may be arbitrarily added and removed.
-<p class="documentation">A 'state object', on the other hand, wants to always be
-  in at least one of a set of possible states. Maybe you are designing some
-  cool, custom 3-way toggle control. The toggle control you are designing must
-  always be in one of only 3 states. It can never <i>not</i> be in one of three
-  states.</p>
-<p class="documentation">Laminar makes it easy to implement such a thing.</p>
-<p class="documentation">This may be done by instantiating a new type of Laminar
-  object called a "State Object":</p>
+  different from classes. <i>Any</i> class may be arbitrarily added and removed.
+  A '<i>state object</i>', on the other hand, wants to always be in at least one
+  of a set of possible states.
+<p class="documentation">Maybe you are designing some cool, custom 3-way toggle
+  control. The toggle control you are designing must always be in one of only 3
+  states. It can never <i>not</i> be in one of three states.</p>
+<p class="documentation">Laminar makes it easy to implement such a thing. Take a
+  look:</p>
 <script>
   holderDiv8 = new Laminar.Widget({
     id:"holderdiv8",
@@ -633,7 +691,7 @@ Laminar object to see what it is set to.</p>
 <p class="documentation">You see that we gave 'stateElement' a list of all of
   the states that it can possibly be in ("on", "off", "idle"). The property that
   defines these possible states is called <em>statelist</em>.</p>
-<p class="documentation">Notice that we've alse not given this object a value
+<p class="documentation">Notice that we've also not given this object a value
   (buttons usually display thier 'value' attribute). Instead, we set the value
   of this object after it has been created by using the <em>set()</em> method -
   setting the 'value' attribute to whatever the current state of the object is.</p>

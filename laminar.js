@@ -51,7 +51,7 @@ Laminar.Widget = (function(){
     //console.log("Gobbling element with the following attribs: " + JSON.stringify(attributeList));
     var widgetConfigObj = {};
     for(var count=0;count<attributeList.length;count++) {
-      //console.log("Attrib: " + attributeList[count].name + " = " + attributeList[count].value);
+      // console.log("Attrib: " + attributeList[count].name + " = " + attributeList[count].value);
       widgetConfigObj[attributeList[count]["name"]] = attributeList[count]["value"];
     }
     widgetConfigObj["element"] = domObj["tagName"];
@@ -62,6 +62,7 @@ Laminar.Widget = (function(){
       widgetConfigObj.classlist = widgetConfigObj.class.split(" ");
     }
     widgetConfigObj.clobber = true;
+    // console.log(JSON.stringify(widgetConfigObj));
     return widgetConfigObj;
   }
 
@@ -83,16 +84,17 @@ Laminar.Widget = (function(){
       _clobber(configObj);
     }
     this.element = configObj.element || defaultElementType;
-    this.parent = configObj.parent || "body";
+    // this.parent = configObj.parent || "body";
+    var p = configObj.parent || "body";
     this.events = {};
     this.subscriptions = [];
     this.states = [];
     this.mutations = new MutationObserver(function(mutation) {
       for(var m in mutation) {
         if(mutation.hasOwnProperty(m)) {
-          console.log("Mutation: '" + mutation[m].attributeName + "' occurred");
-          console.log("Target: '" + mutation[m].target.tagName + "'");
-          console.log(JSON.stringify(mutation[m]));
+          // console.log("Mutation: '" + mutation[m].attributeName + "' occurred");
+          // console.log("Target: '" + mutation[m].target.tagName + "'");
+          // console.log(JSON.stringify(mutation[m]));
         }
       }
     })
@@ -119,6 +121,7 @@ Laminar.Widget = (function(){
           }.bind(this));
         }
       }
+      this.setParent(p);
     }
 
     this.mutations.observe(this.domElement, {attributes: true});
@@ -139,6 +142,23 @@ Laminar.Widget = (function(){
     this.domElement.setAttribute(attrib,val);
     return this;
   };
+
+  /**
+   * Set or change the object's parent
+   *
+   * This can effectively MOVE and object from one part of the DOM to another
+   *
+   * @returns {Object} This Laminar widget
+   */
+  Widget.prototype.setParent = function(elementSelector) {
+    if(elementSelector!==null || elementSelector!="undefined") {
+      this.parent = elementSelector;
+      this.remove();
+      this.update();
+    }
+    return this;
+  }
+
 
   /**
    * Set an input's value
@@ -178,7 +198,7 @@ Laminar.Widget = (function(){
   Widget.prototype.setData = function(dataList) {
     for(var key in dataList) {
       if(dataList.hasOwnProperty(key)) {
-        console.log("Setting key: " + key + " to: " + dataList[key]);
+        // console.log("Setting key: " + key + " to: " + dataList[key]);
         this.domElement.dataset[key] = dataList[key];
       }
     }
@@ -224,7 +244,10 @@ Laminar.Widget = (function(){
    * @returns {Object} This removed Laminar Widget object
    */
   Widget.prototype.remove = function() {
-    return this.domElement.parentNode.removeChild(this.domElement);
+    if(this.domElement.parentNode!="undefined" && this.domElement.parentNode!==null) {
+      return this.domElement.parentNode.removeChild(this.domElement);
+    }
+    return false;
   };
 
   /**
@@ -554,7 +577,7 @@ Laminar.Widget = (function(){
       if(foundObject) {
         foundObject.appendChild(this.domElement);
         if(typeof func === "function") {
-          console.log("Invoking init function");
+          // console.log("Invoking init function");
           func(this);
         }
       }
@@ -567,7 +590,7 @@ Laminar.Widget = (function(){
    **/
 
   Widget.prototype.dispatchEvent = function(eventName) {
-    console.log("Dispatching event: " + eventName);
+    // console.log("Dispatching event: " + eventName);
     var event = new Event(eventName, {
       bubbles:true
     });
@@ -577,7 +600,7 @@ Laminar.Widget = (function(){
   Widget.prototype.listenEvent = function(eventName, func) {
     if(typeof(func)!=="function") return this;
     this.domElement.addEventListener(eventName, function(e) {
-      console.log("Event fired: " + e.type);
+      // console.log("Event fired: " + e.type);
       func(e, this);
     }.bind(this));
   };
@@ -633,7 +656,7 @@ Laminar.Model = (function() {
   var queryRe = /[=<>]=/;
   var isQuery = function(string) {
     return queryRe.test(string);
-  }
+  };
 
   var allKeysPresent = function(obj) {
     var keys = ["key","value"];
@@ -641,7 +664,7 @@ Laminar.Model = (function() {
       if(!obj.hasOwnProperty(keys[key])) return false;
     }
     return true;
-  }
+  };
 
   function Model(k, v, t) {   // <key|object> <value> <type>
     if(typeof(k)=='object') {
@@ -680,13 +703,13 @@ Laminar.Model = (function() {
   };
   Model.prototype.getKey = function() {
     return this.key;
-  }
+  };
   Model.prototype.setType = function(type) {
     return this.type = type || defaultType;
   };
   Model.prototype.getType = function() {
     return this.type;
-  }
+  };
   Model.prototype.setValue = function(v) {
     if(v!==undefined) {
       if(!Array.isArray(v)) v = [v];
@@ -726,9 +749,9 @@ Laminar.Model = (function() {
     }
     for(var c=0; c<this.value.length; c++) {
       if(this.value[c] instanceof Laminar.Model) {
-        console.log("Searching sub-object: " + this.value[c].key + " (" + Array.isArray(this.value[c].key) + ")");
+        // console.log("Searching sub-object: " + this.value[c].key + " (" + Array.isArray(this.value[c].key) + ")");
         if(this.value[c].key==k) {
-          console.log("Found an object with matching key: " + k);
+          // console.log("Found an object with matching key: " + k);
           if(Array.isArray(keyArray) && keyArray.length>0) {
             return this.value[c].getByArray(keyArray);
           } else {
@@ -769,12 +792,12 @@ Laminar.Model = (function() {
   Model.prototype.getDataSet = function(key) {
     var returnset = [];
     if(typeof(key)==='function') {
-      console.log("getDataSet: Found function as set filter");
+      // console.log("getDataSet: Found function as set filter");
       this.value.forEach(function(v,i,a) {
         if(key(v)==true) returnset.push(v);
       });
     } else if(Array.isArray(key)) {
-      console.log("getDataSet: Found array as set filter");
+      // console.log("getDataSet: Found array as set filter");
       while(key.length>0) {
         var newkey = key.shift();
         this.value.forEach(function(v,i,a) {
@@ -782,7 +805,7 @@ Laminar.Model = (function() {
         })
       }
     } else {
-      console.log("getDataSet: Found string as set filter");
+      // console.log("getDataSet: Found string as set filter");
       this.value.forEach(function(v,i,a) {
         if(v.key=key) returnset.push(v);
       })
