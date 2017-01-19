@@ -51,7 +51,7 @@ Laminar.Widget = (function(){
     //console.log("Gobbling element with the following attribs: " + JSON.stringify(attributeList));
     var widgetConfigObj = {};
     for(var count=0;count<attributeList.length;count++) {
-      // console.log("Attrib: " + attributeList[count].name + " = " + attributeList[count].value);
+      //console.log("Attrib: " + attributeList[count].name + " = " + attributeList[count].value);
       widgetConfigObj[attributeList[count]["name"]] = attributeList[count]["value"];
     }
     widgetConfigObj["element"] = domObj["tagName"];
@@ -625,10 +625,10 @@ Laminar.Widget = (function(){
 
     if(Array.isArray(evnt)) {
       for(var i in evnt) {
-        this.subscriptions.push(setSubscribe(obj,evnt[i],func));
+        this.subscriptions.push(setSubscribe(obj,evnt[i],func.bind(this)));
       }
     } else {
-      this.subscriptions.push(setSubscribe(obj,evnt,func));
+      this.subscriptions.push(setSubscribe(obj,evnt,func.bind(this)));
     }
   };
 
@@ -723,6 +723,7 @@ Laminar.Model = (function() {
     } else {
       this.value = [];
     }
+    return this;
   };
   Model.prototype.read = function(index) {
     if(index!==null || index!==undefined) if(this.value[index]) return this.value[index];
