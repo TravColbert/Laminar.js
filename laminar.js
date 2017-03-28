@@ -76,16 +76,7 @@ Laminar.Widget = (function(){
    */
   function Widget(configObj) {
     configObj = configObj || {};
-    if(configObj.nodeType) {    // Its a DOM object
-      configObj = _gobble(configObj);
-      _clobber(configObj);
-    } else if(typeof configObj=="string")  {
-      configObj = _gobble(_findElement(configObj));
-      _clobber(configObj);
-    }
-    this.element = configObj.element || defaultElementType;
-    // this.parent = configObj.parent || "body";
-    var p = configObj.parent || "body";
+
     this.events = {};
     this.subscriptions = [];
     this.states = [];
@@ -97,31 +88,45 @@ Laminar.Widget = (function(){
           // console.log(JSON.stringify(mutation[m]));
         }
       }
-    })
+    });
+
 
     if(configObj) {
-      this.domElement = document.createElement(this.element);
-      if(configObj.hasOwnProperty("id")) this.set("id",configObj.id);
-      if(configObj.hasOwnProperty("type")) this.set("type",configObj.type);
-      this.addClass(defaultElementClass);
-      if(configObj.hasOwnProperty("classlist")) this.addClasses(configObj.classlist);
-      if(configObj.hasOwnProperty("content")) this.content(configObj.content);
-      if(configObj.hasOwnProperty("value")) this.set("value",configObj.value);
-      if(configObj.hasOwnProperty("proplist")) this.setProps(configObj["proplist"]);
-      if(configObj.hasOwnProperty("datalist")) this.setData(configObj["datalist"]);
-      if(configObj.hasOwnProperty("statelist")) {
-        this.states = configObj["statelist"];
-        this.setState();
-      }
-      if(configObj.hasOwnProperty("responsive")) {
-        if(typeof configObj.responsive == "function") {
-          this.responsive = configObj.responsive;
-          window.addEventListener("resize",function(){
-            this.responsive(this);
-          }.bind(this));
+      if(configObj.nodeType) {    // Its a DOM object
+        this.domElement = configObj;
+        this.addClass(defaultElementClass);
+      } else if(typeof configObj=="string")  {
+        this.domElement = _findElement(configObj);
+        this.addClass(defaultElementClass);
+      } else {
+        this.element = configObj.element || defaultElementType;
+        // this.parent = configObj.parent || "body";
+        var p = configObj.parent || "body";
+
+        this.domElement = document.createElement(this.element);
+
+        if(configObj.hasOwnProperty("id")) this.set("id",configObj.id);
+        if(configObj.hasOwnProperty("type")) this.set("type",configObj.type);
+        this.addClass(defaultElementClass);
+        if(configObj.hasOwnProperty("classlist")) this.addClasses(configObj.classlist);
+        if(configObj.hasOwnProperty("content")) this.content(configObj.content);
+        if(configObj.hasOwnProperty("value")) this.set("value",configObj.value);
+        if(configObj.hasOwnProperty("proplist")) this.setProps(configObj["proplist"]);
+        if(configObj.hasOwnProperty("datalist")) this.setData(configObj["datalist"]);
+        if(configObj.hasOwnProperty("statelist")) {
+          this.states = configObj["statelist"];
+          this.setState();
         }
+        if(configObj.hasOwnProperty("responsive")) {
+          if(typeof configObj.responsive == "function") {
+            this.responsive = configObj.responsive;
+            window.addEventListener("resize",function(){
+              this.responsive(this);
+            }.bind(this));
+          }
+        }
+        this.setParent(p);
       }
-      this.setParent(p);
     }
 
     this.mutations.observe(this.domElement, {attributes: true});
@@ -329,6 +334,10 @@ Laminar.Widget = (function(){
 
   Widget.prototype.getScrollTop = function() {
     return this.domElement.scrollTop;
+  };
+
+  Widget.prototype.getBoundingTop = function() {
+    return this.domElement.getBoundingClientRect().top;
   };
   /**
    * Return the position of this widget (left,top)
