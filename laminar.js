@@ -28,7 +28,7 @@ Laminar.Widget = (function(){
   }
   /**
    * If there is an element with the same ID specified in the configObj then
-   * remove that DOM element so that a new one canbe created.
+   * remove that DOM element so that a new one can be created.
    *
    * @private
    * @param {Object} configObj The configuration object
@@ -92,41 +92,44 @@ Laminar.Widget = (function(){
 
 
     if(configObj) {
+      var p;
       if(configObj.nodeType) {    // Its a DOM object
         this.domElement = configObj;
         this.addClass(defaultElementClass);
+        configObj = _gobble(this.domElement);
       } else if(typeof configObj=="string")  {
         this.domElement = _findElement(configObj);
         this.addClass(defaultElementClass);
       } else {
         this.element = configObj.element || defaultElementType;
-        // this.parent = configObj.parent || "body";
-        var p = configObj.parent || "body";
-
         this.domElement = document.createElement(this.element);
-
-        if(configObj.hasOwnProperty("id")) this.set("id",configObj.id);
-        if(configObj.hasOwnProperty("type")) this.set("type",configObj.type);
-        this.addClass(defaultElementClass);
-        if(configObj.hasOwnProperty("classlist")) this.addClasses(configObj.classlist);
-        if(configObj.hasOwnProperty("content")) this.content(configObj.content);
-        if(configObj.hasOwnProperty("value")) this.set("value",configObj.value);
-        if(configObj.hasOwnProperty("proplist")) this.setProps(configObj["proplist"]);
-        if(configObj.hasOwnProperty("datalist")) this.setData(configObj["datalist"]);
-        if(configObj.hasOwnProperty("statelist")) {
-          this.states = configObj["statelist"];
-          this.setState();
-        }
-        if(configObj.hasOwnProperty("responsive")) {
-          if(typeof configObj.responsive == "function") {
-            this.responsive = configObj.responsive;
-            window.addEventListener("resize",function(){
-              this.responsive(this);
-            }.bind(this));
-          }
-        }
-        this.setParent(p);
       }
+
+      // this.parent = configObj.parent || "body";
+      p = configObj.parent || "body";
+
+      if(configObj.hasOwnProperty("id")) this.set("id",configObj.id);
+      if(configObj.hasOwnProperty("type")) this.set("type",configObj.type);
+      this.addClass(defaultElementClass);
+      if(configObj.hasOwnProperty("classlist")) this.addClasses(configObj.classlist);
+      if(configObj.hasOwnProperty("content")) this.content(configObj.content);
+      if(configObj.hasOwnProperty("value")) this.set("value",configObj.value);
+      if(configObj.hasOwnProperty("proplist")) this.setProps(configObj["proplist"]);
+      if(configObj.hasOwnProperty("datalist")) this.setData(configObj["datalist"]);
+      if(configObj.hasOwnProperty("statelist")) {
+        this.states = configObj["statelist"];
+        this.setState();
+      }
+      if(configObj.hasOwnProperty("responsive")) {
+        if(typeof configObj.responsive == "function") {
+          this.responsive = configObj.responsive;
+          window.addEventListener("resize",function(){
+            this.responsive(this);
+          }.bind(this));
+        }
+      }
+      this.setParent(p);
+//      }
     }
 
     this.mutations.observe(this.domElement, {attributes: true});
@@ -151,7 +154,7 @@ Laminar.Widget = (function(){
   /**
    * Set or change the object's parent
    *
-   * This can effectively MOVE and object from one part of the DOM to another
+   * This can effectively MOVE an object from one part of the DOM to another
    *
    * @returns {Object} This Laminar widget
    */
@@ -606,12 +609,20 @@ Laminar.Widget = (function(){
     this.domElement.dispatchEvent(event);
   };
 
-  Widget.prototype.listenEvent = function(eventName, func) {
+  Widget.prototype.listenEvent = function(eventName, func, configObj) {
     if(typeof(func)!=="function") return this;
     this.domElement.addEventListener(eventName, function(e) {
       // console.log("Event fired: " + e.type);
-      func(e, this);
+      if(typeof(func)==="function") {
+        func(e, this);
+        if(configObj) {
+          if(configObj.hasOwnProperty("doOnce") && configObj.doOnce===true)  {
+            func = null;
+          }
+        }
+      }
     }.bind(this));
+    return this;
   };
 
   /*

@@ -124,9 +124,8 @@
 <pre>
   firstElement = new Laminar.Widget({
     id:"firstelement",
-    content:"Some text",
+    content:"My first Laminar widget",
     classlist:["demo"],
-    label:"Hello?",
     parent:".content"
   }).update();
 </pre>
@@ -136,7 +135,7 @@
   // Give it an ID of "myelement"
   firstElement = new Laminar.Widget({
     id:"firstelement",
-    content:"Some text",
+    content:"My first Laminar widget",
     classlist:["demo"],
     parent:".content"
   }).update();
@@ -147,7 +146,7 @@
   make them easier to see. By default, Laminar objects do not come with the demo
   class attached.</p>
 <p class="documentation">You can see that we define a Laminar widget by giving the
-  Laminar.Widget constructor some JSON that looks like this:</p>
+  Laminar.Widget constructor a configuration object that looks like this:</p>
 <pre>
   {
     id:"firstelement",
@@ -178,6 +177,31 @@
   your web page.</p>
 <p class="documentation">This isn't a bad thing. It allows you to build Laminar
   objects, manipulate them, then finally place them in your web page later.</p>
+
+<h3>Changing Parent</h3>
+<p class="documentation">You can use the method: <i>setParent()</i> to change a Laminar element's parent from one DOM container to another. This is the same as <b>moving</b> a DOM element.</p>
+<p class="documentation">Try using the <i>setParent()</i> method here.</p>
+<div>
+  <div id="divfirst" class="demo"></div>
+  <div id="divsecond" class="demo"></div>
+</div>
+<script>
+  var childishElement = new Laminar.Widget({
+    id:"childishelement",
+    element:"input",
+    type:"button",
+    value:"Child Element",
+    parent:"#divfirst"
+  }).update();
+
+  var trigger = function(e, obj) {
+    var newParent = (obj.parent=="#divfirst") ? "#divsecond" : "#divfirst";
+    obj.setParent(newParent);
+  }
+
+  childishElement.listenEvent("click",trigger);
+
+</script>
 
 <h2>Contents</h2>
 <p class="documentation">You see that property called <em>content</em> in the
@@ -284,7 +308,7 @@
     id:"textinputelement",
     element:"input",
     type:"textinput",
-    value:"Press Me",
+    value:"Search",
     content:"This is a button",
     parent:"#inputholder"
   }).update();
@@ -520,6 +544,41 @@ object to execute that function when it is clicked?</p>
   positions the element. Every time you click the element, the trigger function
   is fired and the class is toggled on and off.</p>
 
+<h3>Other Event Methods</h3>
+<p class="documentation">Sometimes it is good to have a little more control over
+when the events actually fire... and <i>if</i> they fire at all. You might, for
+example, have a button or a link that you only want to have fired <b>once</b>.
+Other Javascript libraries have a method called <i>once</i> that can be bound to
+DOM objects. Laminar has the same ability but it is in the <i>listenEvent()</i>
+method.</p>
+<p>Simply pass the <i>listenEvent()</i> method an object with <b>doOnce</b>
+equaling <b>true</b>.</p>
+<pre>
+  singleUseElement = new Laminar.Widget({
+    id:"singleuseelement",
+    value:"Click Me!",
+    element:"input",
+    type:"button",
+    classlist:["slow"],
+    parent:".content"
+  }).update();
+
+  shiftyElement.listenEvent("click",trigger,{'doOnce':true});
+</pre>
+
+<script>
+  singleUseElement = new Laminar.Widget({
+    id:"singleuseelement",
+    value:"Click Me!",
+    element:"input",
+    type:"button",
+    classlist:["slow"],
+    parent:".content"
+  }).update();
+
+  singleUseElement.listenEvent("click",trigger,{'doOnce':true});
+</script>
+
 <h2>Dimensions & Position</h2>
 <p class="documentation">Sometimes you need to know the dimensions and
   positioning of your Laminar objects. You can ask any Laminar object where it
@@ -587,7 +646,60 @@ object to execute that function when it is clicked?</p>
     responsive:checkWidth
   }).update(checkWidth);
 </script>
-<p class="documentation">The above Laminar box will react as you resize the window.</p>
+<p class="documentation">The above Laminar box will react as you resize the
+window.</p>
+<p class="documentation">The key to how this widget works is the new
+configuration property: <b>responsive</b>.</p>
+<p class="documentation">The <b>responsive</b> property creates an event-listener
+behind the scenes that listens for <i>resize</i> events on the DOM. When a
+resize event happens, the supplied function is invoked.</p>
+<p class="documentation">Here is how the above example looks:</p>
+<pre>
+  var longText = 'This is a DIV that responds to changes in page width. This element will change its contents depending on what its width is'
+  var checkWidth = function(thisObj) {
+    var dimension = thisObj.getDimensions();
+    if(dimension.width<200) {
+      thisObj.setState('wtiny');
+      thisObj.html("DIV");
+    } else if(dimension.width<400) {
+      thisObj.setState('wsmall');
+      thisObj.html("Responsive DIV");
+    } else if(dimension.width<600) {
+      thisObj.setState('wmed');
+      thisObj.html('This is a Responsive DIV');
+    } else {
+      thisObj.setState('wfull');
+      thisObj.html(longText);
+    }
+  };
+  var responsiveDiv = new Laminar.Widget({
+    id:'responsivediv',
+    content:longText,
+    classlist:["demo","responsive"],
+    statelist:["wfull","wmed","wsmall","wtiny"],
+    parent:".content",
+    responsive:checkWidth
+  }).update(checkWidth);
+</pre>
+<p class="documentation">So, let's break down what is happening here.</p>
+<p class="documentation">The first line simply creates the text that will appear
+in our Laminar DIV object.</p>
+<p class="documentation">The second statement creates a function called <i>checkWidth()</i>
+that does two things depending on the width of the object that is passed to it:</p>
+<ul>
+  <li>Sets the <b>STATE</b> of our Laminar DIV to one of 4 possible classes: <b>wfull, wmed, wsmall, wtiny</b></li>
+  <li>Sets the text that should appear in the DIV</li>
+</ul>
+<p class="documentation">Finally the last statement creates the Laminar DIV. It
+is defined as a state-type object so that it can only ever be in one of only 4
+states.</p>
+<p class="documentation">Most importantly, the <b>responsive</b> property is set
+to the function defined above. Every time the Laminar DIV object detects a
+resize in the web page, it will invoke the responsive function which adds
+exactly one of 4 classes to the object.</p>
+<p class="documentation">Or course, CSS rules defined elsewhere change the color
+of the DIV based on the class applied to the element.</p>
+
 <h2>HTML5 Data Attributes</h2>
 <p class="documentation">HTML5 introduced <em>data attributes</em>. These were a nice
 provision to store extra data in an element in a standard way.</p>
