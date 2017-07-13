@@ -55,14 +55,13 @@ Laminar.Widget = (function(){
       widgetConfigObj[attributeList[count]["name"]] = attributeList[count]["value"];
     }
     widgetConfigObj["element"] = domObj["tagName"];
-    widgetConfigObj["content"] = domObj.innerHTML || '';
+    //widgetConfigObj["content"] = domObj.innerHTML || '';
     var parentID = domObj.parentNode.getAttribute("id");
     widgetConfigObj["parent"] = (parentID) ? "#" + parentID : "body";
     if(widgetConfigObj.hasOwnProperty("class")) {
       widgetConfigObj.classlist = widgetConfigObj.class.split(" ");
     }
     widgetConfigObj.clobber = true;
-    // console.log(JSON.stringify(widgetConfigObj));
     return widgetConfigObj;
   }
 
@@ -93,7 +92,9 @@ Laminar.Widget = (function(){
 
     if(configObj) {
       var p;
+      var gobbledElement = false;
       if(configObj.nodeType) {    // Its a DOM object
+        gobbledElement = true;
         this.domElement = configObj;
         this.addClass(defaultElementClass);
         configObj = _gobble(this.domElement);
@@ -105,8 +106,7 @@ Laminar.Widget = (function(){
         this.domElement = document.createElement(this.element);
       }
 
-      // this.parent = configObj.parent || "body";
-      p = configObj.parent || "body";
+      p = configObj.parent || "body"; // Set the parent of this object
 
       if(configObj.hasOwnProperty("id")) this.set("id",configObj.id);
       if(configObj.hasOwnProperty("type")) this.set("type",configObj.type);
@@ -129,7 +129,6 @@ Laminar.Widget = (function(){
         }
       }
       this.setParent(p);
-//      }
     }
 
     this.mutations.observe(this.domElement, {attributes: true});
