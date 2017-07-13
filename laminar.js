@@ -637,6 +637,29 @@ Laminar.Widget = (function(){
   };
   */
 
+  Widget.prototype.watch = function(obj,propertyName,func) {
+    var setterPropertyName = "__set_" + propertyName;
+    var setterFunctions = "__fnc_" + propertyName;
+    Object.defineProperty(
+      obj,
+      setterPropertyName,
+      {
+        configurable: true,
+        set: function(val) {
+          this.propertyName = val;
+          for(var c=0;c<this[setterFunctions].length; c++) {
+            this[setterFunctions][c](val);
+          }
+        }
+      }
+    );
+    /* If functon holder property does not exist, create it */
+    if(!obj.hasOwnProperty(setterFunctions)) {
+      obj[setterFunctions] = [];
+    }
+    obj[setterFunctions].push(func);
+  };
+
   Widget.prototype.subscribe = function(obj,evnt,func) {
     var setSubscribe = function(obj,evnt,func) {
       var token = obj.subscribe(evnt,func);
