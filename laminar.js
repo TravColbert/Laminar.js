@@ -55,7 +55,8 @@ Laminar.Widget = (function(){
       widgetConfigObj[attributeList[count]["name"]] = attributeList[count]["value"];
     }
     widgetConfigObj["element"] = domObj["tagName"];
-    //widgetConfigObj["content"] = domObj.innerHTML || '';
+    var myId = domObj.getAttribute('id');
+    if(myId!==null || myId!==undefined) widgetConfigObj["id"] = myId;
     var parentID = domObj.parentNode.getAttribute("id");
     widgetConfigObj["parent"] = (parentID) ? "#" + parentID : "body";
     if(widgetConfigObj.hasOwnProperty("class")) {
@@ -158,11 +159,20 @@ Laminar.Widget = (function(){
    * @returns {Object} This Laminar widget
    */
   Widget.prototype.setParent = function(elementSelector) {
-    if(elementSelector!==null || elementSelector!="undefined") {
+    if(elementSelector===null || elementSelector==="undefined") return this;
+    
+    if(elementSelector instanceof Widget) {
+      console.log("Found a parent thats a Laminar.Widget. ID: " + elementSelector.getId());
+      this.parent = "#" + elementSelector.getId();
+    } else if(elementSelector.nodeType) {    // Its a DOM object
+      console.log("Found a parent thats a DOM object");
+      this.parent = "#" + elementSelector.getAttribute("id");
+    } else if(typeof elementSelector=="string")  {
+      console.log("Found a parent thats a CSS selector");
       this.parent = elementSelector;
-      this.remove();
-      this.update();
     }
+    this.remove();
+    this.update();
     return this;
   }
 
@@ -613,7 +623,7 @@ Laminar.Widget = (function(){
     this.domElement.addEventListener(eventName, function(e) {
       // console.log("Event fired: " + e.type);
       if(typeof(func)==="function") {
-        func(e, this);
+        func(e, this);    // The event type and the object detecting the event
         if(configObj) {
           if(configObj.hasOwnProperty("doOnce") && configObj.doOnce===true)  {
             func = null;
