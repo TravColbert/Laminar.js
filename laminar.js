@@ -160,15 +160,15 @@ Laminar.Widget = (function(){
    */
   Widget.prototype.setParent = function(elementSelector) {
     if(elementSelector===null || elementSelector==="undefined") return this;
-    
+
     if(elementSelector instanceof Widget) {
-      console.log("Found a parent thats a Laminar.Widget. ID: " + elementSelector.getId());
+      //console.log("Found a parent thats a Laminar.Widget. ID: " + elementSelector.getId());
       this.parent = "#" + elementSelector.getId();
     } else if(elementSelector.nodeType) {    // Its a DOM object
-      console.log("Found a parent thats a DOM object");
+      //console.log("Found a parent thats a DOM object");
       this.parent = "#" + elementSelector.getAttribute("id");
     } else if(typeof elementSelector=="string")  {
-      console.log("Found a parent thats a CSS selector");
+      //console.log("Found a parent thats a CSS selector");
       this.parent = elementSelector;
     }
     this.remove();
