@@ -546,6 +546,7 @@ Laminar.Widget = (function(){
    * @returns {Object} This Laminar widget
    */
   Widget.prototype.empty = function() {
+    if(!this.hasOwnProperty("element")) return this;
     if(this.element.toLowerCase()=="input") {
       this.domElement.value = '';
     } else {
@@ -647,18 +648,30 @@ Laminar.Widget = (function(){
   */
 
   Widget.prototype.watch = function(obj,propertyName,func) {
-    var setterPropertyName = "__set_" + propertyName;
+    var valPropertyName = "__val_" + propertyName;
     var setterFunctions = "__fnc_" + propertyName;
+    var thisWidget = this;
     Object.defineProperty(
       obj,
-      setterPropertyName,
+      valPropertyName,
+      {
+        configurable:true,
+        writable:true
+      }
+    );
+    Object.defineProperty(
+      obj,
+      propertyName,
       {
         configurable: true,
         set: function(val) {
-          this.propertyName = val;
+          this[valPropertyName] = val;
           for(var c=0;c<this[setterFunctions].length; c++) {
-            this[setterFunctions][c](val);
+            this[setterFunctions][c].call(thisWidget,val);
           }
+        },
+        get: function() {
+          return this[valPropertyName]
         }
       }
     );

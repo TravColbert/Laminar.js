@@ -850,6 +850,86 @@ Laminar object to see what it is set to.</p>
 
   //xyzElement.find().style["border"] = "1px solid red";
 </script>
+<h3>Watching Objects</h3>
+<p class="documentation">Laminar widgets can be told to watch objects in your 
+  code for changes. When those changes occur the Laminar widget can do something.</p>
+<p class="documentation">For example, let's create a regular old Javascript object that will 
+  contain <strong>to-do items</strong>. When we add items to this object, Laminar
+  will create new widgets.</p>
+<p class="documentartion">Ok, so first, let's create the object. It can just be empty
+  for all we care:</p>
+<pre>
+  var toDoList = {};
+</pre>
+<p class="documentation">So, we have a simple Javascript object called <em>toDoList</em>.</p>
+<p class="documentation">Now, let's create a new Laminar widget that will 
+  <strong>watch</strong> a property in the <em>toDoList</em> object and do something 
+  when that propert is set.</p>
+<pre>
+  var lister = new Laminar.Widget({
+    id:"listerObject",
+    parent:"#listexperiment"
+  });
+  lister.watch(toDoList,"list",doSomething);
+</pre>
+<p class="documentation">The widget named <em>"lister"</em> has an <strong>id</strong> 
+  property of <em>listerObject</em> and will be placed in the parent DOM object with 
+  ID: "listerexperiment". The lister widget's <em>watch()</em> method is now going to invoke
+  the <em>doSomething()</em> function whenever the <strong>list</strong> property is set.</p>
+<p class="documentation">For simplicity let's make the <em>doSomething()</em> function just 
+  change the content of the <em>lister</em> widget.</p>
+<pre>
+  var doSomething = function(val) {
+    this.empty();
+    this.content(val);
+  }
+</pre>
+<div id="listexperiment" class="demo"></div>
+<script>
+  var doSomething = function(val) {
+    this.empty();
+    this.content(val);
+  }
+  var toDoList = {};
+  var lister = new Laminar.Widget({
+    id:"listerObject",
+    parent:"#listexperiment"
+  });
+  lister.watch(toDoList,"list",doSomething);
+</script>
+<p class="documentation">Now, when you set the <em>list</em> property to something:</p>
+<pre>
+  toDoList.list = "Something to do";
+</pre>
+<p class="documentation">the Laminar widget above will change its contents to the same.</p>
+<p class="documentation">Notice that the <em>doSomething</em> function is called from within the
+  context of the Laminar widget from which the <em>watch()</em> method was defined. This means
+  that the <em>this</em> property points to the Laminar widget - not the watched object.</p>
+<p class="documentation">The value passed to the function is the changed property.</p>
+
+<div id="todoexperiment" class="demo"></div>
+<script>
+  var toDoListList = new Laminar.Widget(document.getElementById("todoexperiment"));
+  var toDoListWidgets;
+  var modifyItem = function(val) {
+    if(!Array.isArray(val)) return false;
+    var thisObject = this;
+    toDoListWidgets = [];
+    //console.log("Items: " + toDoListWidgets.length);
+    this.empty();
+    val.forEach(function(v,i,a) { //value, index, array
+      console.log("Value: " + v);
+      toDoListWidgets.push(new Laminar.Widget({
+        id:"todo_" + i,
+        content:v,
+        parent:thisObject
+      }));
+    });
+  }
+  var toDos = {};
+  toDoListList.watch(toDos,"list",modifyItem);
+</script>
+
 </section>
 </body>
 </html>
