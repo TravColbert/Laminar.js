@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Laminar Examples</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" href="css/laminar_doc.css">
+</head>
+<body>
+<script src="../laminar.js"></script>
+<script src="../laminar.model.js"></script>
+<script>
+  var o = {
+    fname:"Travis",
+    lname:"Colbert",
+    age:45,
+    male:true
+  };
+
+  var lo = new Laminar.Model(o);
+
+  console.log(lo);
+
+  var arr = [1,2,3,4,5];
+  var larr = new Laminar.Model(arr);
+
+  console.log(larr);
+</script>
+</body>
+</html>
