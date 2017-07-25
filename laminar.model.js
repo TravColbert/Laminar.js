@@ -1,30 +1,30 @@
 Laminar.Model = (function() {
   function Model(obj) {
+    this.setIsArray(Array.isArray(obj));
+    
     for(var key in obj) {
       if(obj.hasOwnProperty(key)) {
-        console.log("Making setter and getter for key: " + key);
-        this.setProp(key,null,null,obj[key]);
-        //this[key] = obj[key];
+        this.add(key,obj[key]);
       }
     }
-    this.setIsArray(Array.isArray(obj));
   }
 
   Model.prototype = {
-    setProp : function(prop,setFunc,getFunc,val) {
+    add : function(prop,val,setfunc,getfunc) {
+      if(this.isArray) {
+        this.push(val);
+      } else {
+        this.setProp(prop,val,setfunc,getfunc);
+      }
+    },
+    setProp : function(prop,val,setFunc,getFunc) {
       setFunc = setFunc || function (val) {
         console.log("Invoking setter function for " + prop);
         return val;
       };
-      getFunc = getFunc || function (val) {return val};
-      Object.defineProperty(
-        this,
-        "__val_" + prop,
-        {
-          configurable:true,
-          writable:true
-        }
-      );
+      getFunc = getFunc || function (val) {
+        return val;
+      };
       Object.defineProperty(
         this,
         prop,
@@ -32,17 +32,21 @@ Laminar.Model = (function() {
           configurable:false,
           enumerable:true,
           set: function(val) {
-            this["__val_" + prop] = setFunc.call(this,val);
+            if(this.isArray) {
+              console.log("Invoking array-style push of val: " + val);
+              [].push.call(this,val);
+            }
             return this;
           },
           get: function() {
-            return getFunc(this["__val_" + prop]);
+            return getFunc(this[prop]);
           }
         }
       );
       if(!val===undefined) this[prop] = val;
     },
     setIsArray : function(isarray) {
+      console.log("Value is array: " + isarray);
       Object.defineProperty(
         this,
         "isArray",
@@ -55,23 +59,7 @@ Laminar.Model = (function() {
       );
     },
     push : function(val) {
-      console.log(this.isArray);
-      if(this.isArray) {
-        var keys = Object.keys(this);
-        for(var c=keys.length; c>=0; c--) {
-          //if(keys[c])
-        }
-      }
-      return this;
-    },
-    add : function(value) {
-      if(value instanceof Laminar.Model) {
-        value.index = this.value.length;
-        value.parent = this;
-        this.setSubscription(value);
-      }
-      this.value.push(value);
-      this.publish("add", this);
+      [].push.call(this,val);
       return this;
     },
     del : function(index) {
