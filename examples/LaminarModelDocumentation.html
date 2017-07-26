@@ -11,18 +11,59 @@
 <script src="../laminar.js"></script>
 <script src="../laminar.model.js"></script>
 <script>
-  /*
   var o = {
     fname:"Travis",
     lname:"Colbert",
     age:45,
     male:true
   };
-  var lo = new Laminar.Model(o);
-  */
+  
+  var makeProxyHandlerObj = function() {
+    var proxyHandler = {
+      get: function(target,property) {
+        for(f in this.getFunctions) {
+          this.getFunctions[f](target,property);
+        }
+        return property in target ? target[property] : false;
+      },
+      set: function(target,property,value,receiver) {
+        for(f in this.setFunctions) {
+          this.setFunctions[f](target,property,value,receiver);
+        }
+        return target[property] = value;
+      },
+    };
 
+    for(handler in proxyHandler) {
+      Object.defineProperty(
+        proxyHandler,
+        proxyHandler[handler] + "Functions",
+        {
+          configurable:false,
+          enumerable:false,
+          value:[]
+        }
+      );
+    }
+
+    proxyHandler
+
+  }
+
+  proxyHandler.setFunctions.push(function(target,property,value,receiver){
+    console.log("This is an added SET function!");
+    console.log(target,property,value);
+  });
+  var po = new Proxy(o,proxyHandler);
+  console.log(po.fname);
+  po.fname = "Bob";
+  console.log(po.fname);
+
+  /*
   var arr = [1,2,3,40,5];
   var larr = new Laminar.Model(arr);
+  */
+
 </script>
 </body>
 </html>
