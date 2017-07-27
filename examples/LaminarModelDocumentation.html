@@ -20,7 +20,9 @@
 
   var handlerFunctions = {};
   
-  var makeProxyHandlerObj = function() {
+  var makeProxyHandlerObj = function(handlerFunctionObj) {
+    handlerFunctionObj = handlerFunctionObj || {};
+
     var proxyHandler = {
       get: function(target,property) {
         for(f in this.handlerFunctions.getFunctions) {
@@ -34,7 +36,7 @@
         }
         return (target[property] = value);
       },
-      handlerFunctions: handlerFunctions,
+      handlerFunctions: handlerFunctionObj,
     };
 
     Object.defineProperty(
@@ -43,7 +45,7 @@
       {
         configurable:false,
         enumerable:false,
-        value:handlerFunctions
+        value:handlerFunctionObj
       }
     );
 
@@ -64,12 +66,13 @@
     return proxyHandler;
   }
 
-  var proxyHandler = makeProxyHandlerObj();
+  var proxyHandler = makeProxyHandlerObj(handlerFunctions);
 
   var po = new Proxy(o,proxyHandler);
 
   handlerFunctions.setFunctions.push(function(target,property,value,receiver){
-    console.log("This is an added SET function setting " + value + " on " + property + " in object " + target + " by ");
+    //console.log("This is an added SET function setting " + value + " on " + property + " in object " + target + " by ");
+    console.log("This is an added SET function setting ");
   });
 
   console.log(po.fname);
@@ -77,7 +80,8 @@
   console.log(po.fname);
 
   handlerFunctions.setFunctions.push(function(target,property,value,receiver){
-    console.log("This is a SECOND SETTER function added after the proxy object was created. See how we can add handler functions?! " + value);
+    //console.log("This is a SECOND SETTER function added after the proxy object was created. See how we can add handler functions?! " + value);
+    console.log("This is a SECOND SETTER function added after the proxy object was created. See how we can add handler functions?!");
   });
 
   po.age = 40;
@@ -89,16 +93,23 @@
 
   handlerFunctions.getFunctions.push(function(target,property){
     console.log("Here's an extra GET function!");
-    console.log(target[property] + " <--- YEAH!");
+    //console.log(target[property] + " <--- YEAH!");
   });
 
   po.age;
 
+/*
   larr[0];
 
   larr[1] = "22";
 
   larr.push(6);
+  larr[7] = 7;
+
+  po.favorite_color = "orange";
+  console.log(po.favorite_color);
+*/
+  po.scores = larr;
 
 </script>
 </body>
