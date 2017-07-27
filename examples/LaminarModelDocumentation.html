@@ -17,27 +17,42 @@
     age:45,
     male:true
   };
+
+  var handlerFunctions = {};
   
   var makeProxyHandlerObj = function() {
     var proxyHandler = {
       get: function(target,property) {
-        for(f in this.getFunctions) {
-          this.getFunctions[f](target,property);
+        for(f in this.handlerFunctions.getFunctions) {
+          this.handlerFunctions.getFunctions[f](target,property);
         }
         return property in target ? target[property] : false;
       },
       set: function(target,property,value,receiver) {
-        for(f in this.setFunctions) {
-          this.setFunctions[f](target,property,value,receiver);
+        for(f in this.handlerFunctions.setFunctions) {
+          this.handlerFunctions.setFunctions[f](target,property,value,receiver);
         }
-        return target[property] = value;
+        return (target[property] = value);
       },
+      handlerFunctions: handlerFunctions,
     };
 
+    Object.defineProperty(
+      proxyHandler,
+      handlerFunctions,
+      {
+        configurable:false,
+        enumerable:false,
+        value:handlerFunctions
+      }
+    );
+
     for(handler in proxyHandler) {
+      if(!proxyHandler.hasOwnProperty(handler) || handler=="handlerFunctions") continue;
+      console.log("Creating functions list for " + handler);
       Object.defineProperty(
-        proxyHandler,
-        proxyHandler[handler] + "Functions",
+        proxyHandler.handlerFunctions,
+        handler + "Functions",
         {
           configurable:false,
           enumerable:false,
@@ -46,23 +61,44 @@
       );
     }
 
-    proxyHandler
-
+    return proxyHandler;
   }
 
-  proxyHandler.setFunctions.push(function(target,property,value,receiver){
-    console.log("This is an added SET function!");
-    console.log(target,property,value);
-  });
+  var proxyHandler = makeProxyHandlerObj();
+
   var po = new Proxy(o,proxyHandler);
+
+  handlerFunctions.setFunctions.push(function(target,property,value,receiver){
+    console.log("This is an added SET function setting " + value + " on " + property + " in object " + target + " by ");
+  });
+
   console.log(po.fname);
   po.fname = "Bob";
   console.log(po.fname);
 
-  /*
-  var arr = [1,2,3,40,5];
-  var larr = new Laminar.Model(arr);
-  */
+  handlerFunctions.setFunctions.push(function(target,property,value,receiver){
+    console.log("This is a SECOND SETTER function added after the proxy object was created. See how we can add handler functions?! " + value);
+  });
+
+  po.age = 40;
+
+  console.log("Let's try an array now. It IS an object so it should work but to what extent?");
+
+  var arr = [0,1,2,3,4,5];
+  var larr = new Proxy(arr,proxyHandler);
+
+  handlerFunctions.getFunctions.push(function(target,property){
+    console.log("Here's an extra GET function!");
+    console.log(target[property] + " <--- YEAH!");
+  });
+
+  po.age;
+
+  larr[0];
+
+  larr[1] = "22";
+
+  larr.push(6);
 
 </script>
 </body>
