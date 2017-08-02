@@ -11,77 +11,33 @@
 <script src="../laminar.js"></script>
 <script src="../laminar.model.js"></script>
 <script>
+
   var o = {
     fname:"Travis",
     lname:"Colbert",
     age:45,
     male:true
   };
-
-  var handlerFunctions = {};
   
-  var makeProxyHandlerObj = function(handlerFunctionObj) {
-    handlerFunctionObj = handlerFunctionObj || {};
+  var handlerFunctions = {};
+  var po = Laminar.createModel(o,handlerFunctions);
 
-    var proxyHandler = {
-      get: function(target,property) {
-        for(f in this.handlerFunctions.getFunctions) {
-          this.handlerFunctions.getFunctions[f](target,property);
-        }
-        return property in target ? target[property] : false;
-      },
-      set: function(target,property,value,receiver) {
-        for(f in this.handlerFunctions.setFunctions) {
-          this.handlerFunctions.setFunctions[f](target,property,value,receiver);
-        }
-        return (target[property] = value);
-      },
-      handlerFunctions: handlerFunctionObj,
-    };
+  console.log(handlerFunctions);
 
-    Object.defineProperty(
-      proxyHandler,
-      handlerFunctions,
-      {
-        configurable:false,
-        enumerable:false,
-        value:handlerFunctionObj
-      }
-    );
-
-    for(handler in proxyHandler) {
-      if(!proxyHandler.hasOwnProperty(handler) || handler=="handlerFunctions") continue;
-      console.log("Creating functions list for " + handler);
-      Object.defineProperty(
-        proxyHandler.handlerFunctions,
-        handler + "Functions",
-        {
-          configurable:false,
-          enumerable:false,
-          value:[]
-        }
-      );
-    }
-
-    return proxyHandler;
-  }
-
-  var proxyHandler = makeProxyHandlerObj(handlerFunctions);
-
-  var po = new Proxy(o,proxyHandler);
-
-  handlerFunctions.setFunctions.push(function(target,property,value,receiver){
-    //console.log("This is an added SET function setting " + value + " on " + property + " in object " + target + " by ");
-    console.log("This is an added SET function setting ");
+  handlerFunctions.addHandler("set",function(target,property,value,receiver) {
+    console.log("This is an added SET function setting. Value: ",value," on property: ",property," in object: ",target," by.");
+    return value;
   });
 
   console.log(po.fname);
   po.fname = "Bob";
   console.log(po.fname);
 
-  handlerFunctions.setFunctions.push(function(target,property,value,receiver){
-    //console.log("This is a SECOND SETTER function added after the proxy object was created. See how we can add handler functions?! " + value);
-    console.log("This is a SECOND SETTER function added after the proxy object was created. See how we can add handler functions?!");
+  handlerFunctions.addHandler("set",function(target,property,value,receiver){
+    if(Array.isArray(target) && property=="length") return value;
+    value = value/2;
+    console.log("This is a SECOND SETTER function added after the proxy object was created. See how we can add handler functions?! ",value);
+    return value;
   });
 
   po.age = 40;
@@ -89,28 +45,27 @@
   console.log("Let's try an array now. It IS an object so it should work but to what extent?");
 
   var arr = [0,1,2,3,4,5];
-  var larr = new Proxy(arr,proxyHandler);
+  var larr = Laminar.createModel(arr,handlerFunctions);
 
+  larr.push(100);
+
+  var overThree = larr.filter((val) => {return (val>=3)});
+  console.log(overThree);
+
+  larr[0] = 99;
+  larr.splice(1,larr.length-2);
+  /*
   handlerFunctions.getFunctions.push(function(target,property){
-    console.log("Here's an extra GET function!");
-    //console.log(target[property] + " <--- YEAH!");
+    console.log(target[property]," <--- YEAH!");
   });
 
-  po.age;
+  //po.age;
 
-/*
-  larr[0];
-
-  larr[1] = "22";
-
-  larr.push(6);
-  larr[7] = 7;
-
-  po.favorite_color = "orange";
-  console.log(po.favorite_color);
-*/
+  console.log("What if we assigned a whole object to the array?...");
   po.scores = larr;
 
+  console.log("Number of scores: " + po.scores.length);
+  */
 </script>
 </body>
 </html>

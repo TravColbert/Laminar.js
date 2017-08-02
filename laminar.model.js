@@ -1,144 +1,84 @@
-Laminar.Model = (function() {
-  function Model(obj) {
-    this.setIsArray(Array.isArray(obj));
-    
-    for(var key in obj) {
-      if(obj.hasOwnProperty(key)) {
-        this.add(key,obj[key]);
-      }
-    }
-  }
+/**
+ * @author Travis Colbert trav.colbert@gmail.com
+ */
 
-  Model.prototype = {
-    add : function(prop,val,setfunc,getfunc) {
-      if(this.isArray) {
-        this.push(val);
-      } else {
-        this.setProp(prop,val,setfunc,getfunc);
-      }
-    },
-    setProp : function(prop,val,setFunc,getFunc) {
-      setFunc = setFunc || function (val) {
-        console.log("Invoking setter function for " + prop);
-        return val;
-      };
-      getFunc = getFunc || function (val) {
-        return val;
-      };
+"use strict";
+
+var Laminar = Laminar || {};
+
+Laminar.createModel = function(obj,handlerFunctionObj) {
+  var handlerFunctionProperty = "handlerFunctions";
+  var handlerFunctionSuffix = "HandlerFunctions";
+  var makeProxyHandlerObj = function(handlerFunctionObj) {
+    handlerFunctionObj = handlerFunctionObj || {};
+
+    var proxyHandler = {
+      get: function(target,property) {
+        var thisHandler = "get";
+        var value = (property in target) ? target[property] : false;
+        for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
+          value = this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property,value);
+        }
+        return value;
+      },
+      set: function(target,property,value,receiver) {
+        var thisHandler = "set";
+        for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
+          value = this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property,value,receiver);
+        }
+        return (target[property] = value);
+      },
+      handlerFunctions: handlerFunctionObj,
+    };
+
+    if(!proxyHandler.hasOwnProperty(handlerFunctionProperty)) {
       Object.defineProperty(
-        this,
-        prop,
+        proxyHandler,
+        handlerFunctionProperty,
         {
           configurable:false,
-          enumerable:true,
-          set: function(val) {
-            if(this.isArray) {
-              console.log("Invoking array-style push of val: " + val);
-              [].push.call(this,val);
-            }
-            return this;
-          },
-          get: function() {
-            return getFunc(this[prop]);
+          enumerable:false,
+          value:handlerFunctionObj
+        }
+      );
+    }
+
+    if(!handlerFunctionObj.hasOwnProperty("addHandler")) {
+      Object.defineProperty(
+        handlerFunctionObj,
+        "addHandler",
+        {
+          configurable:false,
+          enumerable:false,
+          value:function(type,func) {
+            console.log("Adding handler: " + type + handlerFunctionSuffix);
+            if(!this.hasOwnProperty(type + handlerFunctionSuffix)) return;
+            this[type + handlerFunctionSuffix].push(func);
           }
         }
-      );
-      if(!val===undefined) this[prop] = val;
-    },
-    setIsArray : function(isarray) {
-      console.log("Value is array: " + isarray);
+      );   
+    };
+
+    for(var handler in proxyHandler) {
+      if(!proxyHandler.hasOwnProperty(handler) || handler==handlerFunctionProperty) continue;
+      if(proxyHandler.handlerFunctions.hasOwnProperty(handler + handlerFunctionSuffix)) continue;
+      console.log("Creating functions list for " + handler + " at: " + handler + handlerFunctionSuffix);
       Object.defineProperty(
-        this,
-        "isArray",
+        proxyHandler.handlerFunctions,
+        handler + handlerFunctionSuffix,
         {
-          value:isarray,
           configurable:false,
-          writable:true,
-          enumerable:false
+          enumerable:false,
+          value:[]
         }
       );
-    },
-    push : function(val) {
-      [].push.call(this,val);
-      return this;
-    },
-    del : function(index) {
-      if(index !== null && index !== undefined) {
-        this.publish("delete", this.value[index]);
-        delete this.value[index];
-        return true;
-      } else {
-        this.publish("delete", this);
-        this.parent.del(this.getIndex());
-        return true;
-      }
-      return false;
-    },
-    update : function(value) {
-      if(value instanceof Laminar.Model) {
-        value.index = 0;
-        value.parent = this;
-      }
-      this.value = [value];
-      this.publish("update", this);
-      return this;
-    },
-    publish : function(evnt, args) {
-      var pubObject = args || this;
-      if(!this.events[evnt]) return false;
-
-      var subscribers = this.events[evnt];
-      var len = subscribers ? subscribers.length : 0;
-
-      while(len--) {
-        subscribers[len].publishfunction(evnt, pubObject);
-      }
-
-      return this;
-    },
-    subscribe : function(evnt, func) {
-      if(!this.events[evnt]) this.events[evnt] = [];
-
-      var token = (++this.eventId).toString();
-      this.events[evnt].push({
-        token: token,
-        publishfunction: func
-      });
-      return token;
-    },
-    unsubscribe : function(evnt, token) {
-      for(var e in this.events[evnt]) {
-        if(this.events[evnt][e].token == token) {
-          this.events[evnt].splice(e,1);    // Delete
-          return true;
-        }
-      }
-      return false;
-    },
-    /**
-    * Creates default bindings to an object. Those defaults are: update, delete,
-    * and add.
-    *
-    * @param {Object} object Typically the Laminar Model that you have added to
-    * this model.
-    * @returns {bool} true is bindings were created, false if not
-    */
-    setSubscription : function(obj) {
-      if (obj.subscribe) {
-        obj.subscribe("update",function(evnt,args) {
-          this.publish("update",this);
-        }.bind(this));
-        obj.subscribe("delete",function(evnt,args) {
-          this.publish("update",this);
-        }.bind(this));
-        obj.subscribe("add",function(evnt,args) {
-          this.publish("update",this);
-        }.bind(this));
-        return true;
-      }
-      return false;
     }
+    return proxyHandler;
   }
 
-  return Model;
-})();
+  handlerFunctionObj = handlerFunctionObj || {};
+  obj = obj || {};
+  var proxyHandlerObj = makeProxyHandlerObj(handlerFunctionObj);
+
+  return new Proxy(obj,proxyHandlerObj);
+}
