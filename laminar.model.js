@@ -26,9 +26,18 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
         for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
           value = this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property,value,receiver);
         }
-        return (target[property] = value);
+        var result = (target[property] = value);
+        this.change(target,property);
+        return result;
       },
-      handlerFunctions: handlerFunctionObj,
+      change: function(target,property) {
+        var thisHandler = "change";
+        for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
+          this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property);
+        }
+        return;        
+      },
+      handlerFunctions: handlerFunctionObj
     };
 
     if(!proxyHandler.hasOwnProperty(handlerFunctionProperty)) {

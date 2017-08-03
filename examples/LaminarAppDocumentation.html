@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Laminar Examples</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="stylesheet" href="css/laminar_doc.css">
+  <link rel="stylesheet" href="../../Laminar.Layouts/laminar-base.css">
+  <style>
+    .todocomplete {
+      text-decoration: line-through
+    }
+  </style>
+</head>
+<body class="layout-col">
+<script src="../laminar.js"></script>
+<script src="../laminar.model.js"></script>
+<div id="laminarapptodolistdiv" class="layout-col">
+  <div id="todolistdiv" class="layout-row"></div>
+</div>
+<div id="todolistadddiv" class="layout-row"></div>
+<div id="todolistcontrolsdiv" class="layout-row"></div>
+<script>
+  // First, we build the model
+  var todoListHandlerFunctions = {};    // This is an object that allows us to 
+                                        // add triggers for events on the model
+
+  // The todo list will just be an array of all the todos
+  var todosArr = new Laminar.createModel([],todoListHandlerFunctions);   // Each todo will be an element in the todos array
+  /* We passed an empty 'todoListHandlerFunctions' object to the createModel() 
+   * method. This method has created a Javascript PROXY object that has wrapped
+   * the empty array ([]).
+   * Also, the 'todoListHandlerFunctions' has now been given a few extra powers.
+   * We can now add new proxy handler functions to it by using its .addHandler()
+   * method.
+   * We'll use it a little later.
+   *
+   * Let's build the mechanism that will properly store a todo when one is 
+   * submitted. We'll use array's normal PUSH() method to add todos. But we 
+   * need to add some ability to properly store a unique ID and completed 
+   * state of each todo.
+   * This is why we use a Javascript PROXY object to wrap around our simple array.
+   * Our PROXY object will intercept PUSH() calls and other methods used on the
+   * array and we can insert our own functions in the process.
+   *
+   * The individual todos will by objects looking like this:
+   *
+  var todo = {
+    description:"This is the first todo",
+    completed:false
+  };
+   *
+   * So, our handler will get a string (description) and it will convert it to an 
+   * object as described above.
+   *
+   * All 'SET'-type handlers must accept arguments of: 
+   *   TARGET - the target object
+   *   PROPERTY - the property name
+   *   VALUE - the desired value of the property
+   */
+  var addTodoItem = function(target,property,value) {
+    /* Let's just check to make sure this is not a SET to the length property
+     * of the array itself. Unfortunately ANY and ALL types of access get 
+     * caught by these PROXY handler events.
+     */
+    if(Array.isArray(target) && property=="length") {
+      // Just pass on the value as if nothing happened.
+      return value;
+    }
+    var todoItem = new Laminar.createModel(
+      {
+        description:value,
+        completed:false
+      }
+    );
+    return todoItem;
+  };
+
+  /* So, now we have a function called addTodoItem that we need to insert into
+   * the PROXY's SET method.
+   * We do this by inserting this fucntion in that empty 'todoListHandlerFunctions'
+   * object we created earlier. As we add methods to it, they get accessible by 
+   * all PROXY objects that are created with it.
+   *
+   * So, let's add the addTodoItem as a SET method.
+   */
+  todoListHandlerFunctions.addHandler("set",addTodoItem);
+
+  /* Now, we have a little function that will always trigger when we do 
+   * something like:
+   * 
+   *   todosArr.push("This is my first todo.");
+   *
+   * Our little handler function will, instead, turn that descripton into an
+   * object and insert the object into the todosArr array.
+   *
+   * Now, let's build the views that will be attached to the model
+   */
+  var todoList = new Laminar.Widget({
+    id:"todolist",
+    classlist:["layout-col"],
+    /* content:"This is an empty todo list", */
+    parent:"#todolistdiv"
+  });
+
+  // An ADD control:
+  var todoListAddDescription = new Laminar.Widget({
+    id:"todolistadddescription",
+    element:"input",
+    type:"textinput",
+    parent:"#todolistadddiv"
+  });
+
+  /* As for that todoList Laminar.Widget, let's teach it how to build a list of
+   * todo items...
+   */
+  todoList.buildItemList = function(list) {
+    todoList.empty();
+    if(list.length<1) {
+      this.content("This is an empty todo list");
+    } else {
+      for(var c=0;c<list.length;c++) {
+        this.buildItem(list[c],c);
+      }
+    }
+  };
+
+  todoList.buildItem = function(item,number) {
+    // The DIV to hold the todo item
+    var itemDiv = new Laminar.Widget({
+      id:"tododiv_" + number,
+      classlist:["layout-row"],
+      parent:todoList
+    });
+    // The todo number
+    var itemId = new Laminar.Widget({
+      id:"todoid_" + number,
+      content:number,
+      parent:itemDiv
+    });
+    // The todo description
+    var itemDescr = new Laminar.Widget({
+      id:"tododescr_" + number,
+      content:item.description,
+      classlist:(item.completed) ? ["todocomplete"] : null,
+      parent:itemDiv
+    });
+    // The todo completed flag
+    var itemComplete = new Laminar.Widget({
+      id:"todocomplete_" + number,
+      element:"input",
+      type:"checkbox",
+      proplist:(item.completed) ? [["checked","true"]] : null,
+      parent:itemDiv
+    });
+    /* When you click the complete checkbox the item has to tell the model that
+     * the todo item has been completed.
+     */
+    itemComplete.listenEvent("change",function(e,obj) {
+      item.completed = (obj.domElement.checked);
+      todosArr.fetchTodos();
+    });
+  };
+
+  todoList.fetchTodos = function() {
+    this.buildItemList(todosArr);
+  }
+  
+  /*
+   * Now, we need to make something that works the other way and updates our UI
+   * when we add a todo.
+   *
+   * Let's create another handler that reacts AFTER the set has been performed.
+   */
+  var changeTodoList = function(list,property) {
+    /* Remember!: array length properties change!
+     * In this case we don't want to work off of that information,
+     * although it is very useful elsewhere!
+     * So, let's ignore it as this step.
+     */
+    if(Array.isArray(list) && property=="length") return;
+    /* Let's make the change cause the todoList Laminar Widget to rebuild the 
+     * todo items
+     */
+    console.log("Alert! It looks like item #",property,"changed!");
+    todoList.buildItemList(list);
+  }
+
+  /* Add it to our todoListHandlerFunctions object:
+   */
+  todoListHandlerFunctions.addHandler("change",changeTodoList);
+  
+
+  /* While we're here let's connect this add control with our model
+   */
+  todoListAddDescription.listenEvent("change",function(e,obj){
+    console.log("Add description value: " + obj.value());
+    // Push the new ToDo into the todosArr
+    todosArr.push(obj.value());
+  });
+
+  todoList.fetchTodos();
+
+</script>
+</body>
+</html>
