@@ -154,12 +154,25 @@
       proplist:(item.completed) ? [["checked","true"]] : null,
       parent:itemDiv
     });
+    // The todo delete button
+    var itemDelete = new Laminar.Widget({
+      id:"tododelete_" + number,
+      element:"input",
+      type:"button",
+      parent:itemDiv
+    });
     /* When you click the complete checkbox the item has to tell the model that
      * the todo item has been completed.
      */
     itemComplete.listenEvent("change",function(e,obj) {
       item.completed = (obj.domElement.checked);
       todosArr.fetchTodos();
+    });
+    /* When you click the delete button we need to delete the item
+     */
+    itemDelete.listenEvent("click",function(e,obj) {
+      console.log("Splicing out",number,"from todosArr array");
+      todosArr.splice(number,1);
     });
   };
 
