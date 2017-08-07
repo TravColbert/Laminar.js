@@ -23,11 +23,16 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
       },
       set: function(target,property,value,receiver) {
         var thisHandler = "set";
+        //console.log("proxyHandler:",thisHandler,":Invoking handlers on target:",target,"property:",property,"value",value);
+        //console.log(JSON.stringify(target));
         for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
+          console.log("proxyHandler:",thisHandler,":function #",f);
           value = this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property,value,receiver);
         }
-        var result = (target[property] = value);
-        this.change(target,property);
+        var result = (target[property] = value) ? true : false;
+        console.log("proxyHandler:" + thisHandler + ": Result of SET operation is",result);
+        console.log(JSON.stringify(target));
+        //this.change(target,property);
         return result;
       },
       change: function(target,property) {
@@ -35,7 +40,7 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
         for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
           this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property);
         }
-        return;        
+        return;
       },
       handlerFunctions: handlerFunctionObj
     };
@@ -60,18 +65,18 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
           configurable:false,
           enumerable:false,
           value:function(type,func) {
-            console.log("Adding handler: " + type + handlerFunctionSuffix);
+            console.log("createModel: Adding handler: " + type + handlerFunctionSuffix);
             if(!this.hasOwnProperty(type + handlerFunctionSuffix)) return;
             this[type + handlerFunctionSuffix].push(func);
           }
         }
-      );   
+      );
     };
 
     for(var handler in proxyHandler) {
       if(!proxyHandler.hasOwnProperty(handler) || handler==handlerFunctionProperty) continue;
       if(proxyHandler.handlerFunctions.hasOwnProperty(handler + handlerFunctionSuffix)) continue;
-      console.log("Creating functions list for " + handler + " at: " + handler + handlerFunctionSuffix);
+      console.log("createModel: Creating empty function array for " + handler + " at: " + handler + handlerFunctionSuffix);
       Object.defineProperty(
         proxyHandler.handlerFunctions,
         handler + handlerFunctionSuffix,

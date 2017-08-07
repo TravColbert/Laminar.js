@@ -23,12 +23,12 @@
 <div id="todolistcontrolsdiv" class="layout-row"></div>
 <script>
   // First, we build the model
-  var todoListHandlerFunctions = {};    // This is an object that allows us to 
+  var todoListHandlerFunctions = {};    // This is an object that allows us to
                                         // add triggers for events on the model
 
   // The todo list will just be an array of all the todos
   var todosArr = new Laminar.createModel([],todoListHandlerFunctions);   // Each todo will be an element in the todos array
-  /* We passed an empty 'todoListHandlerFunctions' object to the createModel() 
+  /* We passed an empty 'todoListHandlerFunctions' object to the createModel()
    * method. This method has created a Javascript PROXY object that has wrapped
    * the empty array ([]).
    * Also, the 'todoListHandlerFunctions' has now been given a few extra powers.
@@ -36,9 +36,9 @@
    * method.
    * We'll use it a little later.
    *
-   * Let's build the mechanism that will properly store a todo when one is 
-   * submitted. We'll use array's normal PUSH() method to add todos. But we 
-   * need to add some ability to properly store a unique ID and completed 
+   * Let's build the mechanism that will properly store a todo when one is
+   * submitted. We'll use array's normal PUSH() method to add todos. But we
+   * need to add some ability to properly store a unique ID and completed
    * state of each todo.
    * This is why we use a Javascript PROXY object to wrap around our simple array.
    * Our PROXY object will intercept PUSH() calls and other methods used on the
@@ -51,48 +51,60 @@
     completed:false
   };
    *
-   * So, our handler will get a string (description) and it will convert it to an 
+   * So, our handler will get a string (description) and it will convert it to an
    * object as described above.
    *
-   * All 'SET'-type handlers must accept arguments of: 
+   * All 'SET'-type handlers must accept arguments of:
    *   TARGET - the target object
    *   PROPERTY - the property name
    *   VALUE - the desired value of the property
    */
   var addTodoItem = function(target,property,value) {
+    console.log("== In the addTodoItem method.\n== This is going to want to create and return a new Laminar model.\n== This is property",property,"with value",value);
+    if(Array.isArray(target)) console.log("Length of array is",target.length);
     /* Let's just check to make sure this is not a SET to the length property
-     * of the array itself. Unfortunately ANY and ALL types of access get 
+     * of the array itself. Unfortunately ANY and ALL types of access get
      * caught by these PROXY handler events.
      */
     if(Array.isArray(target) && property=="length") {
       // Just pass on the value as if nothing happened.
       return value;
     }
+    if(typeof value === "object") {
+      console.log("This is probably an object. Not continueing addTodoItem function");
+      return value;
+    }
+    /*
     var todoItem = new Laminar.createModel(
       {
         description:value,
         completed:false
       }
     );
+    */
+    todoItem = {
+      description:value,
+      completed:false
+    };
     return todoItem;
   };
 
   /* So, now we have a function called addTodoItem that we need to insert into
    * the PROXY's SET method.
    * We do this by inserting this fucntion in that empty 'todoListHandlerFunctions'
-   * object we created earlier. As we add methods to it, they get accessible by 
+   * object we created earlier. As we add methods to it, they get accessible by
    * all PROXY objects that are created with it.
    *
    * So, let's add the addTodoItem as a SET method.
    */
   todoListHandlerFunctions.addHandler("set",addTodoItem);
 
-  /* Now, we have a little function that will always trigger when we do 
+  /* Now, we have a little function that will always trigger when we do
    * something like:
-   * 
+   *
    *   todosArr.push("This is my first todo.");
    *
-   * Our little handler function will, instead, turn that descripton into an
+   * Our little handler function will, instead, turn that descripton into a full
    * object and insert the object into the todosArr array.
    *
    * Now, let's build the views that will be attached to the model
@@ -100,7 +112,6 @@
   var todoList = new Laminar.Widget({
     id:"todolist",
     classlist:["layout-col"],
-    /* content:"This is an empty todo list", */
     parent:"#todolistdiv"
   });
 
@@ -117,16 +128,17 @@
    */
   todoList.buildItemList = function(list) {
     todoList.empty();
-    if(list.length<1) {
-      this.content("This is an empty todo list");
-    } else {
+    if(list.length>0) {
       for(var c=0;c<list.length;c++) {
         this.buildItem(list[c],c);
       }
+      return;
     }
+    this.content("This is an empty todo list");
   };
 
   todoList.buildItem = function(item,number) {
+    console.log("Item",number,item.description);
     // The DIV to hold the todo item
     var itemDiv = new Laminar.Widget({
       id:"tododiv_" + number,
@@ -166,20 +178,26 @@
      */
     itemComplete.listenEvent("change",function(e,obj) {
       item.completed = (obj.domElement.checked);
-      todosArr.fetchTodos();
+      /* For thi iteration we tell the whole todo list model that there has
+       * been an update. The todo list will fetch the change and update the
+       * whole list
+       */
+      todoList.fetchTodos();
     });
     /* When you click the delete button we need to delete the item
      */
     itemDelete.listenEvent("click",function(e,obj) {
       console.log("Splicing out",number,"from todosArr array");
-      todosArr.splice(number,1);
+      console.log("Delete result:",(todosArr.splice(number,1)));
+      todoList.fetchTodos();
     });
   };
 
   todoList.fetchTodos = function() {
+    console.log("todoList is fetching todos from todosArr");
     this.buildItemList(todosArr);
   }
-  
+
   /*
    * Now, we need to make something that works the other way and updates our UI
    * when we add a todo.
@@ -193,17 +211,18 @@
      * So, let's ignore it as this step.
      */
     if(Array.isArray(list) && property=="length") return;
-    /* Let's make the change cause the todoList Laminar Widget to rebuild the 
+    /* Let's make the change cause the todoList Laminar Widget to rebuild the
      * todo items
      */
     console.log("Alert! It looks like item #",property,"changed!");
+    console.log("List is currently:",list.length);
     todoList.buildItemList(list);
   }
 
   /* Add it to our todoListHandlerFunctions object:
    */
   todoListHandlerFunctions.addHandler("change",changeTodoList);
-  
+
 
   /* While we're here let's connect this add control with our model
    */
@@ -211,6 +230,9 @@
     console.log("Add description value: " + obj.value());
     // Push the new ToDo into the todosArr
     todosArr.push(obj.value());
+    /* Lastly, let's make this widget clear itself */
+    todoList.fetchTodos();
+    obj.empty();
   });
 
   todoList.fetchTodos();

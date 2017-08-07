@@ -12,13 +12,35 @@
 <script src="../laminar.model.js"></script>
 <script>
 
+/*
+  var handlerFunctionObj = {};
+  var testarray = Laminar.createModel(["zero","one","two","three"],handlerFunctionObj);
+*/
+
+"use strict";
+
+let proxyHandlerObj = {
+  set:function(target,property,value,receiver) {
+    if(property!="length") {
+      console.log("Set handler is invoked on property:",property,"with value:",value);
+    }
+    let result = (target[property] = value/2);
+    console.log(JSON.stringify(target));
+    return result;
+  }
+};
+
+let proxyArray = new Proxy(["zero","one","two"],proxyHandlerObj);
+
+  /*
+
   var o = {
     fname:"Travis",
     lname:"Colbert",
     age:45,
     male:true
   };
-  
+
   var handlerFunctions = {};
   var po = Laminar.createModel(o,handlerFunctions);
 
@@ -56,11 +78,15 @@
 
   larr.splice(1,larr.length-2);
 
+  */
+
   /*
   handlerFunctions.getFunctions.push(function(target,property){
     console.log(target[property]," <--- YEAH!");
   });
   */
+
+  /*
 
   po.age;
 
@@ -68,6 +94,7 @@
   po.scores = larr;
 
   console.log("Number of scores: " + po.scores.length);
+  */
 </script>
 </body>
 </html>
