@@ -23,18 +23,27 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
       },
       set: function(target,property,value,receiver) {
         var thisHandler = "set";
-        //console.log("proxyHandler:",thisHandler,":Invoking handlers on target:",target,"property:",property,"value",value);
-        //console.log(JSON.stringify(target));
         for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
           console.log("proxyHandler:",thisHandler,":function #",f);
           value = this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property,value,receiver);
         }
-        var result = (target[property] = value) ? true : false;
-        console.log("proxyHandler:" + thisHandler + ": Result of SET operation is",result);
-        console.log(JSON.stringify(target));
-        //this.change(target,property);
+        console.log("proxyHandler:",thisHandler,": ",JSON.stringify(target),"SET value",value,"on property",property,"is");
+        if(!target) return true;
+        var result = ((target[property] = value)!==false)? true : false;
+        console.log("proxyHandler:",thisHandler,": Result of SET value",value,"on property",property,"is",result);
         return result;
       },
+      deleteProperty:function(target,property) {
+        if(!property in target) return false;
+        var thisHandler = "deleteProperty";
+        for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
+          console.log("proxyHandler:",thisHandler,":function #",f);
+          this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property);
+        }
+        var result = !!(delete target[property]);
+        console.log("proxyHandler:",thisHandler,": Result of DELETE operation on property",property,"is",result);
+        return result;
+      },    
       change: function(target,property) {
         var thisHandler = "change";
         for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {

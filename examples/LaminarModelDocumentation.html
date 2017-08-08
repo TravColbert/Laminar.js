@@ -11,28 +11,33 @@
 <script src="../laminar.js"></script>
 <script src="../laminar.model.js"></script>
 <script>
-
-/*
-  var handlerFunctionObj = {};
-  var testarray = Laminar.createModel(["zero","one","two","three"],handlerFunctionObj);
-*/
-
 "use strict";
 
+  var handlerFunctionObj = {};
+  var testarray = Laminar.createModel(["zero","one","two","three"],handlerFunctionObj);
+
+/*
 let proxyHandlerObj = {
   set:function(target,property,value,receiver) {
     if(property!="length") {
       console.log("Set handler is invoked on property:",property,"with value:",value);
     }
-    let result = (target[property] = value/2);
+    // Double ! is a technique to convert truthy values to Boolean
+    let result = !!(target[property] = value);
     console.log(JSON.stringify(target));
+    console.log(result);
     return result;
+  },
+  deleteProperty:function(target,property) {
+    if(!property in target) return false;
+    console.log("Deleting property:",property);
+    return !!(delete target[property]);
   }
 };
 
 let proxyArray = new Proxy(["zero","one","two"],proxyHandlerObj);
-
-  /*
+let proxyArray = new Laminar.createModel(["zero","one","two"]);
+*/
 
   var o = {
     fname:"Travis",
@@ -47,22 +52,24 @@ let proxyArray = new Proxy(["zero","one","two"],proxyHandlerObj);
   console.log(handlerFunctions);
 
   handlerFunctions.addHandler("set",function(target,property,value,receiver) {
-    console.log("This is an added SET function setting. Value: ",value," on property: ",property," in object: ",target," by.");
+    console.log("This is an added SET handler. Value: ",value," on property: ",property," in object: ",target);
     return value;
   });
 
-  console.log(po.fname);
+  console.log("Firstname is",po.fname);
   po.fname = "Bob";
-  console.log(po.fname);
+  console.log("Firstname is",po.fname);
 
   handlerFunctions.addHandler("set",function(target,property,value,receiver){
     if(Array.isArray(target) && property=="length") return value;
+    let origValue = value;
     value = value/2;
-    console.log("This is a SECOND SETTER function added after the proxy object was created. See how we can add handler functions?! ",value);
+    console.log("==This is a SECOND SETTER function added after the proxy object was created.\n==See how we can add handler functions?!\n==See how we can also change the input value? It WAS",origValue,"but now it is",value);
     return value;
   });
 
   po.age = 40;
+  console.log("Age is now:",po.age);
 
   console.log("Let's try an array now. It IS an object so it should work but to what extent?");
 
@@ -71,30 +78,13 @@ let proxyArray = new Proxy(["zero","one","two"],proxyHandlerObj);
 
   larr.push(100);
 
-  var overThree = larr.filter((val) => {return (val>=3)});
+  var overThree = larr.filter((val) => {return (val>3)});
   console.log(overThree);
 
   larr[0] = 99;
 
   larr.splice(1,larr.length-2);
 
-  */
-
-  /*
-  handlerFunctions.getFunctions.push(function(target,property){
-    console.log(target[property]," <--- YEAH!");
-  });
-  */
-
-  /*
-
-  po.age;
-
-  console.log("What if we assigned a whole object to the array?...");
-  po.scores = larr;
-
-  console.log("Number of scores: " + po.scores.length);
-  */
 </script>
 </body>
 </html>
