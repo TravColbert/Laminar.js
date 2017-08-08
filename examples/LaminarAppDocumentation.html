@@ -11,6 +11,25 @@
     .todocomplete {
       text-decoration: line-through
     }
+    .editable .tododescription,
+    .editable .todocomplete,
+    .editable .tododelete 
+    {
+      display: none;
+    }
+    .editable .todoinput {
+      display: visible;
+    }
+    .editable .tododescription,
+    .editable .todocomplete,
+    .editable .tododelete 
+    {
+      display: visible;
+    }
+    .noteditable .todoinput {
+      display: none;
+    }
+
   </style>
 </head>
 <body class="layout-col">
@@ -91,7 +110,7 @@
 
   /* So, now we have a function called addTodoItem that we need to insert into
    * the PROXY's SET method.
-   * We do this by inserting this fucntion in that empty 'todoListHandlerFunctions'
+   * We do this by inserting this function in that empty 'todoListHandlerFunctions'
    * object we created earlier. As we add methods to it, they get accessible by
    * all PROXY objects that are created with it.
    *
@@ -143,19 +162,23 @@
     var itemDiv = new Laminar.Widget({
       id:"tododiv_" + number,
       classlist:["layout-row"],
+      statelist:["noteditable","editable"],
       parent:todoList
-    });
-    // The todo number
-    var itemId = new Laminar.Widget({
-      id:"todoid_" + number,
-      content:number,
-      parent:itemDiv
     });
     // The todo description
     var itemDescr = new Laminar.Widget({
       id:"tododescr_" + number,
       content:item.description,
-      classlist:(item.completed) ? ["todocomplete"] : null,
+      classlist:(item.completed) ? ["todocomplete","tododescription"] : ["tododescription"],
+      parent:itemDiv
+    });
+    // A way to edit the todo...
+    var itemInput = new Laminar.Widget({
+      id:"todoinput_" + number,
+      element:"input",
+      type:"textinput",
+      classlist:["todoinput"],
+      value:item.description,
       parent:itemDiv
     });
     // The todo completed flag
@@ -164,6 +187,7 @@
       element:"input",
       type:"checkbox",
       proplist:(item.completed) ? [["checked","true"]] : null,
+      classlist:["todocomplete"],
       parent:itemDiv
     });
     // The todo delete button
@@ -171,14 +195,40 @@
       id:"tododelete_" + number,
       element:"input",
       type:"button",
+      classlist:["tododelete"],
       parent:itemDiv
+    });
+    /* When you double-click the description let's edit the todo
+     */
+    itemDescr.listenEvent("dblclick",function(e,obj) {
+      console.log("Editing todo element",obj.html());
+      itemDiv.setState("editable");
+    });
+    /* When you change the todoinput we have to tell the model that the todo
+     * item's description has changed.
+     */
+    itemInput.listenEvent("change",function(e,obj) {
+      item.description = obj.value();
+      /* For this iteration we tell the whole todo list model that there has
+       * been an update. The todo list will fetch the change and update the
+       * whole list
+       */
+      todoList.fetchTodos();
+    });
+    itemInput.listenEvent("blur",function(e,obj) {
+      item.description = obj.value();
+      /* For this iteration we tell the whole todo list model that there has
+       * been an update. The todo list will fetch the change and update the
+       * whole list
+       */
+      todoList.fetchTodos();
     });
     /* When you click the complete checkbox the item has to tell the model that
      * the todo item has been completed.
      */
     itemComplete.listenEvent("change",function(e,obj) {
       item.completed = (obj.domElement.checked);
-      /* For thi iteration we tell the whole todo list model that there has
+      /* For this iteration we tell the whole todo list model that there has
        * been an update. The todo list will fetch the change and update the
        * whole list
        */
