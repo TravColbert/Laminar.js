@@ -12,6 +12,31 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
   var makeProxyHandlerObj = function(handlerFunctionObj) {
     handlerFunctionObj = handlerFunctionObj || {};
 
+    var markDirty = function(target,property,value) {
+      //if(property=="save") return value;
+      if(target[property]!=value) {
+        if(!target.hasOwnProperty("__dirty")) {
+          Object.defineProperty(
+            target,
+            "__dirty",
+            {
+              configurable:false,
+              enumerable:false,
+              value:[]
+            }
+          );
+        }
+        if(target.__dirty.indexOf(property)<0) target.__dirty.push(property);
+      }
+      return value;
+    };
+
+    var alertDirty = function(dirtyField) {
+      for(var f in target.__dirtyList[dirtyField]) {
+        target.__dirtyList[dirtyField][f]();
+      }
+    }
+
     var proxyHandler = {
       get: function(target,property) {
         var thisHandler = "get";
@@ -27,9 +52,10 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
           console.log("proxyHandler:",thisHandler,":function #",f);
           value = this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property,value,receiver);
         }
-        console.log("proxyHandler:",thisHandler,": ",JSON.stringify(target),"SET value",value,"on property",property,"is");
+        console.log("proxyHandler:",thisHandler,": ",JSON.stringify(target),"SET value",value,"on property",property);
         if(!target) return true;
-        var result = ((target[property] = value)!==false)? true : false;
+        markDirty(target,property,value);
+        var result = ((target[property] = value)!==false) ? true : false;
         console.log("proxyHandler:",thisHandler,": Result of SET value",value,"on property",property,"is",result);
         return result;
       },
@@ -82,6 +108,23 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
       );
     };
 
+    if(!handlerFunctionObj.hasOwnProperty("addDirtyHandler")) {
+      Object.defineProperty(
+        handlerFunctionObj,
+        "addDirtyHandler",
+        {
+          configurable:false,
+          enumerable:false,
+          value:function(field,func) {
+            console.log("createModel: registering dirty handler:",field);
+            for(var f in target["__dirtyAlerts"]) {
+              target["__dirtyAlerts"].push(func);
+            }
+          }
+        }
+      );
+    }
+
     for(var handler in proxyHandler) {
       if(!proxyHandler.hasOwnProperty(handler) || handler==handlerFunctionProperty) continue;
       if(proxyHandler.handlerFunctions.hasOwnProperty(handler + handlerFunctionSuffix)) continue;
@@ -102,6 +145,36 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
   handlerFunctionObj = handlerFunctionObj || {};
   obj = obj || {};
   var proxyHandlerObj = makeProxyHandlerObj(handlerFunctionObj);
+  var newProxyObj = new Proxy(obj,proxyHandlerObj);
+  
+  Object.defineProperty(
+    newProxyObj,
+    "__save",
+    {
+      configurable:false,
+      enumerable:false,
+      value:function() {
+        // Signal listening objects of dirty values;
+        if(this.hasOwnProperty("__dirty")) {
+          this.__dirty.forEach(function(v,i,a) {
+            console.log(v,"is dirty");
+          });
+        }
+        return this;
+      }
+    }
+  );
 
-  return new Proxy(obj,proxyHandlerObj);
+  Object.defineProperty(
+    newProxyObj,
+    "__dirtyAlerts",
+    {
+      configurable:false,
+      enumerable:false,
+      value:[]
+    }
+  );
+
+  //handlerFunctionObj.addHandler("set",markDirty);
+  return newProxyObj;
 }
