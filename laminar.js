@@ -189,6 +189,18 @@ Laminar.Widget = (function(){
   };
 
   /**
+   * Set a new element type
+   * 
+   * @param {string} element The type of element to change to
+   * @returns {Object} The Laminar Widget object
+   */
+  Widget.prototype.setElement = function(type) {
+    for(var attribute in this.domElement.attributes) {
+      console.log("Attribute",attribute,"value",this.domElement.attributes[attribute]);
+    }
+  };
+
+  /**
    * Get the value of an HTML attribute.
    *
    * @param {string} attrib The HTML attribute
