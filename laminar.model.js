@@ -46,15 +46,13 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
         }
         console.log("proxyHandler:",thisHandler,": ",JSON.stringify(target),"SET value",value,"on property",property);
         if(!target) return result;
-        if(target[property]!=property) {
-          var result = ((target[property] = value)!==false) ? true : false;
+        var result = ((target[property] = value)!==false) ? true : false;
+        //if(result) {
           console.log("proxyHandler:",thisHandler,": Result of SET value",value,"on property",property,"is",result);
-          if(result) {
-            console.log("Performing dirty functions");
-            markDirty(target,property);
-            this.change(target,property);
-          }
-        }
+          console.log("Performing dirty functions");
+          markDirty(target,property);
+          this.change(target,property);
+        //}
         return result;
       },
       deleteProperty:function(target,property) {
@@ -65,7 +63,10 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
           this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property);
         }
         var result = !!(delete target[property]);
-        console.log("proxyHandler:",thisHandler,": Result of DELETE operation on property",property,"is",result);
+        //if(result) {
+          console.log("proxyHandler:",thisHandler,": Result of DELETE operation on property",property,"is",result);
+          this.change(target,property);
+        //}
         return result;
       },    
       change: function(target,property) {
@@ -146,6 +147,21 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
       }
     }
   );
+
+  Object.defineProperty(
+    newProxyObj,
+    "__getHandlerObject",
+    {
+      configurable:false,
+      enumerable:false,
+      value:function() {
+        console.log("Fetching proxyHandlerObj");
+        console.log(JSON.stringify(handlerFunctionObj));
+        return handlerFunctionObj;
+      }
+    }
+  );
+
 
   return newProxyObj;
 }
