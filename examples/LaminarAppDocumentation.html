@@ -35,9 +35,7 @@
 <body class="layout-col">
 <script src="../laminar.js"></script>
 <script src="../laminar.model.js"></script>
-<div id="laminarapptodolistdiv" class="layout-col"> <!-- the list of TODOs -->
-  <!-- <div id="todolistdiv" class="layout-row"></div> -->
-</div>
+<div id="laminarapptodolistdiv" class="layout-col"></div> <!-- the list of TODOs -->
 <div id="todolistadddiv" class="layout-row"></div> <!-- to add new TODOs -->
 <div id="todolistcontrolsdiv" class="layout-row"></div> <!-- extra TODO list controls -->
 <script>
@@ -76,13 +74,21 @@
    *   PROPERTY - the property name
    *   VALUE - the desired value of the property
    */
-  var addTodoItem = function(target,property,value) {
+
+  /* We need to insert into whatever we build into the PROXY's SET method.
+   * We do this by inserting this function in that empty 'todoListHandlerFunctions'
+   * object we created earlier. As we add methods to it, they get accessible by
+   * all PROXY objects that are created with it.
+   *
+   * So, let's add the addTodoItem as a SET method.
+   */
+  todoListHandlerFunctions.addHandler("set",function(target,property,value) {
     console.log("== In the addTodoItem method.\n== This is going to want to create and return a new Laminar model.\n== This is property",property,"with value",value);
     if(Array.isArray(target)) console.log("Length of array is",target.length);
     /* Let's just check to make sure this is not a SET to the length property
-     * of the array itself. Unfortunately ANY and ALL types of access get
-     * caught by these PROXY handler events.
-     */
+    * of the array itself. Unfortunately ANY and ALL types of access get
+    * caught by these PROXY handler events.
+    */
     if(Array.isArray(target) && property=="length") {
       // Just pass on the value as if nothing happened.
       return value;
@@ -91,34 +97,47 @@
       console.log("This is probably an object. Not continueing addTodoItem function");
       return value;
     }
-    var todoItem = new Laminar.createModel(
-      {
-        description:value,
-        completed:false
-      }
-    );
-    return todoItem;
-  };
-
-  /* So, now we have a function called addTodoItem that we need to insert into
-   * the PROXY's SET method.
-   * We do this by inserting this function in that empty 'todoListHandlerFunctions'
-   * object we created earlier. As we add methods to it, they get accessible by
-   * all PROXY objects that are created with it.
-   *
-   * So, let's add the addTodoItem as a SET method.
-   */
-  todoListHandlerFunctions.addHandler("set",addTodoItem);
-
+    /* We create a new Laminar Proxy model based on a simple POJO (plain old 
+    * Javascript object) that contains our TODOs description and if it is 
+    * completed.
+    * We will later be able hook into each of these TODO proxy objects
+    */
+    return new Laminar.createModel({description:value,completed:false});
+  });
   /* Now, we have a little function that will always trigger when we do
    * something like:
    *
    *   todosArr.push("This is my first todo.");
    *
-   * Our little handler function will, instead, turn that descripton into a full
-   * object and insert the object into the todosArr array.
+   * Our little handler function will, instead, turn that descripton into a 
+   * full object and insert the object into the todosArr array.
+   */
+
+  /*
+   * Next, we need to make something that works the other way and updates our 
+   * UI when we add a todo.
    *
-   * Now, let's build the views that will be attached to the model
+   * Let's create another handler that reacts AFTER changes are detected in the
+   * TODO list.
+   * 
+   * We'll add it to the 'change' handler built into the todosArr proxy object.
+   */
+   todoListHandlerFunctions.addHandler("change",function(list,property) {
+    /* Remember!: array length properties change!
+    * In this case we don't want to work off of that information,
+    * although it is very useful elsewhere!
+    * So, let's ignore it as this step.
+    */
+    if(Array.isArray(list) && property=="length") return;
+    /* Let's make the change cause the todoList Laminar Widget to rebuild the
+    * todo items
+    */
+    console.log("Alert! It looks like item #",property,"changed!");
+    console.log("List is currently:",list.length);
+    todoList.buildItemList(list);
+  });
+
+  /* Now, let's build the UI elements that will be attached to the model
    * 
    * This is just a plain DIV element that will soon know how to build lists of 
    * TODOs. Right now we just make an empty element.
@@ -261,12 +280,11 @@
       console.log("Delete result:",result);
     });
 
-    /* We might want to customize some reactive actions when this item changes
+    /* We might want to customize some reactive actions when this model changes
      * in that case, we want to grab the proxyHandlerObject for this item.
-     * This will allow us to add more actions to the proxy.
+     * This will allow us to add more actions to the proxy later.
      */
     var handlerObj = item.__getHandlerObject();
-
     handlerObj.addHandler("change",function(target,property) {
       if(property=="description") itemDescr.empty(target[property]);
       if(property=="completed") {
@@ -281,31 +299,6 @@
       }
     });
   };
-
-  /*
-   * Now, we need to make something that works the other way and updates our UI
-   * when we add a todo.
-   *
-   * Let's create another handler that reacts AFTER the set has been performed.
-   */
-  var changeTodoList = function(list,property) {
-    /* Remember!: array length properties change!
-     * In this case we don't want to work off of that information,
-     * although it is very useful elsewhere!
-     * So, let's ignore it as this step.
-     */
-    if(Array.isArray(list) && property=="length") return;
-    /* Let's make the change cause the todoList Laminar Widget to rebuild the
-     * todo items
-     */
-    console.log("Alert! It looks like item #",property,"changed!");
-    console.log("List is currently:",list.length);
-    todoList.buildItemList(list);
-  }
-
-  /* Add it to our todoListHandlerFunctions object:
-   */
-  todoListHandlerFunctions.addHandler("change",changeTodoList);
 
   todoList.buildItemList(todosArr);
 
