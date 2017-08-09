@@ -35,11 +35,11 @@
 <body class="layout-col">
 <script src="../laminar.js"></script>
 <script src="../laminar.model.js"></script>
-<div id="laminarapptodolistdiv" class="layout-col">
-  <div id="todolistdiv" class="layout-row"></div>
+<div id="laminarapptodolistdiv" class="layout-col"> <!-- the list of TODOs -->
+  <!-- <div id="todolistdiv" class="layout-row"></div> -->
 </div>
-<div id="todolistadddiv" class="layout-row"></div>
-<div id="todolistcontrolsdiv" class="layout-row"></div>
+<div id="todolistadddiv" class="layout-row"></div> <!-- to add new TODOs -->
+<div id="todolistcontrolsdiv" class="layout-row"></div> <!-- extra TODO list controls -->
 <script>
   // First, we build the model
   var todoListHandlerFunctions = {};    // This is an object that allows us to
@@ -56,14 +56,12 @@
    * We'll use it a little later.
    *
    * Let's build the mechanism that will properly store a todo when one is
-   * submitted. We'll use array's normal PUSH() method to add todos. But we
-   * need to add some ability to properly store a unique ID and completed
-   * state of each todo.
+   * submitted. We'll use array's normal PUSH() method to add todos.
    * This is why we use a Javascript PROXY object to wrap around our simple array.
    * Our PROXY object will intercept PUSH() calls and other methods used on the
    * array and we can insert our own functions in the process.
    *
-   * The individual todos will by objects looking like this:
+   * The individual todos will be objects looking like this:
    *
   var todo = {
     description:"This is the first todo",
@@ -93,18 +91,12 @@
       console.log("This is probably an object. Not continueing addTodoItem function");
       return value;
     }
-    /*
     var todoItem = new Laminar.createModel(
       {
         description:value,
         completed:false
       }
     );
-    */
-    todoItem = {
-      description:value,
-      completed:false
-    };
     return todoItem;
   };
 
@@ -127,14 +119,17 @@
    * object and insert the object into the todosArr array.
    *
    * Now, let's build the views that will be attached to the model
+   * 
+   * This is just a plain DIV element that will soon know how to build lists of 
+   * TODOs. Right now we just make an empty element.
    */
   var todoList = new Laminar.Widget({
     id:"todolist",
     classlist:["layout-col"],
-    parent:"#todolistdiv"
+    parent:"#laminarapptodolistdiv"
   });
 
-  // An ADD control:
+  // An ADD control element - just an input box:
   var todoListAddDescription = new Laminar.Widget({
     id:"todolistadddescription",
     element:"input",
@@ -142,11 +137,28 @@
     parent:"#todolistadddiv"
   });
 
-  /* As for that todoList Laminar.Widget, let's teach it how to build a list of
-   * todo items...
+  /* Let's teach the todoListAddDescription how to actually add a new TODO to
+   * the model. Per the above all we want to do is PUSH() a new string to the
+   * TODO list. The string is the TODO description.
+   * We also specify that this widget should react on 'change' DOM events.
+   */
+  todoListAddDescription.listenEvent("change",function(e,obj){
+    console.log("Add description value: " + obj.value());
+    // Push the new ToDo into the todosArr
+    todosArr.push(obj.value());
+    /* Lastly, let's make this widget clear itself */
+    obj.empty();
+  });
+
+  /* So, now we have UI element that adds new TODO items to the model.
+   * Now, it is time to teach the todoList it how to build a list of
+   * todo items.
+   * When given an array of TODOs we need it to progress through each record and
+   * build an entry in our interface.
    */
   todoList.buildItemList = function(list) {
-    todoList.empty();
+    this.empty();
+    console.log("TODO list is",list.length,"elements long");
     if(list.length>0) {
       for(var c=0;c<list.length;c++) {
         this.buildItem(list[c],c);
@@ -156,7 +168,16 @@
     this.content("This is an empty todo list");
   };
 
+  /* Here is the function that actually builds a TODO item - the UI pieces and the
+   * connective code.
+   */
   todoList.buildItem = function(item,number) {
+    /* When elements are deleted in arrays we might get here before the length
+     * property of the array has been set. So, we need to check if we actually 
+     * have an element. This can't be used in all cases because sometimes you
+     * might really be sending 'null' or 'undefined'
+     */
+    if(!item) return;
     console.log("Item",number,item.description);
     // The DIV to hold the todo item
     var itemDiv = new Laminar.Widget({
@@ -165,14 +186,18 @@
       statelist:["noteditable","editable"],
       parent:todoList
     });
+    // The rest of the items go into the above DIV...
+
     // The todo description
     var itemDescr = new Laminar.Widget({
       id:"tododescr_" + number,
       content:item.description,
-      classlist:(item.completed) ? ["todocomplete","tododescription"] : ["tododescription"],
+      classlist:["tododescription"],
+      statelist:["todonotcomplete","todocomplete"],
       parent:itemDiv
     });
-    // A way to edit the todo...
+    if(item.completed) itemDescr.setState("todocomplete");
+    // A way to edit the todo. A normally hidden text input.
     var itemInput = new Laminar.Widget({
       id:"todoinput_" + number,
       element:"input",
@@ -198,55 +223,64 @@
       classlist:["tododelete"],
       parent:itemDiv
     });
-    /* When you double-click the description let's edit the todo
+
+    /* Now, let's build some of the connective tissue between the above UI 
+     * elements and the model that we created earlier.
+     */
+
+    /* When you double-click the TODO item's description let's edit the TODO
+     * This simply changes the state of the container DIV for this TODO item.
+     * Through CSS, we change the visibility of the UI elements in the DIV.
      */
     itemDescr.listenEvent("dblclick",function(e,obj) {
       console.log("Editing todo element",obj.html());
       itemDiv.setState("editable");
     });
-    /* When you change the todoinput we have to tell the model that the todo
+    /* When you change the todoInput we have to tell the model that the todo
      * item's description has changed.
      */
     itemInput.listenEvent("change",function(e,obj) {
+      itemDiv.setState("noteditable");
       item.description = obj.value();
-      /* For this iteration we tell the whole todo list model that there has
-       * been an update. The todo list will fetch the change and update the
-       * whole list
-       */
-      todoList.fetchTodos();
     });
     itemInput.listenEvent("blur",function(e,obj) {
+      itemDiv.setState("noteditable");
       item.description = obj.value();
-      /* For this iteration we tell the whole todo list model that there has
-       * been an update. The todo list will fetch the change and update the
-       * whole list
-       */
-      todoList.fetchTodos();
     });
     /* When you click the complete checkbox the item has to tell the model that
      * the todo item has been completed.
      */
     itemComplete.listenEvent("change",function(e,obj) {
       item.completed = (obj.domElement.checked);
-      /* For this iteration we tell the whole todo list model that there has
-       * been an update. The todo list will fetch the change and update the
-       * whole list
-       */
-      todoList.fetchTodos();
     });
     /* When you click the delete button we need to delete the item
      */
     itemDelete.listenEvent("click",function(e,obj) {
       console.log("Splicing out",number,"from todosArr array");
-      console.log("Delete result:",(todosArr.splice(number,1)));
-      todoList.fetchTodos();
+      var result = (todosArr.splice(number,1));
+      console.log("Delete result:",result);
+    });
+
+    /* We might want to customize some reactive actions when this item changes
+     * in that case, we want to grab the proxyHandlerObject for this item.
+     * This will allow us to add more actions to the proxy.
+     */
+    var handlerObj = item.__getHandlerObject();
+
+    handlerObj.addHandler("change",function(target,property) {
+      if(property=="description") itemDescr.empty(target[property]);
+      if(property=="completed") {
+        console.log("Item is complete:",target[property]);
+        if(target[property]) {
+          itemDescr.setState("todocomplete")
+          itemComplete.set("checked","true");
+        } else {
+          itemDescr.setState("todonotcomplete")
+          itemComplete.unset("checked");
+        }
+      }
     });
   };
-
-  todoList.fetchTodos = function() {
-    console.log("todoList is fetching todos from todosArr");
-    this.buildItemList(todosArr);
-  }
 
   /*
    * Now, we need to make something that works the other way and updates our UI
@@ -273,19 +307,7 @@
    */
   todoListHandlerFunctions.addHandler("change",changeTodoList);
 
-
-  /* While we're here let's connect this add control with our model
-   */
-  todoListAddDescription.listenEvent("change",function(e,obj){
-    console.log("Add description value: " + obj.value());
-    // Push the new ToDo into the todosArr
-    todosArr.push(obj.value());
-    /* Lastly, let's make this widget clear itself */
-    todoList.fetchTodos();
-    obj.empty();
-  });
-
-  todoList.fetchTodos();
+  todoList.buildItemList(todosArr);
 
 </script>
 </body>
