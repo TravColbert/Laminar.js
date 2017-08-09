@@ -151,6 +151,12 @@ Laminar.Widget = (function(){
     return this;
   };
 
+  Widget.prototype.unset = function(attrib) {
+    if(attrib=="value" && this.element.toLowerCase()=="input") return this.setValue('');
+    this.domElement.removeAttribute(attrib);
+    return this;
+  }
+
   /**
    * Set or change the object's parent
    *
@@ -305,7 +311,12 @@ Laminar.Widget = (function(){
   Widget.prototype.setProps = function(props) {
     if(props===null || props===undefined || props.length<1) return false;
     props.forEach(function(e,i,a) {
-      if (e[0]!==undefined) this.set(e[0],e[1]);
+      if (e[0]===null || e[0]===undefined || e[0]=='') {
+        // Delete the property
+
+      } else {
+        this.set(e[0],e[1]);
+      }
     }.bind(this));
   };
 
@@ -557,13 +568,14 @@ Laminar.Widget = (function(){
    *
    * @returns {Object} This Laminar widget
    */
-  Widget.prototype.empty = function() {
+  Widget.prototype.empty = function(content) {
     if(!this.hasOwnProperty("element")) return this;
     if(this.element.toLowerCase()=="input") {
       this.domElement.value = '';
     } else {
       this.domElement.innerHTML = '';
     }
+    if(content) this.content(content);
     return this;
   };
 
