@@ -13,7 +13,7 @@
     }
     .editable .tododescription,
     .editable .todocomplete,
-    .editable .tododelete 
+    .editable .tododelete
     {
       display: none;
     }
@@ -22,7 +22,7 @@
     }
     .editable .tododescription,
     .editable .todocomplete,
-    .editable .tododelete 
+    .editable .tododelete
     {
       display: visible;
     }
@@ -97,8 +97,8 @@
       console.log("This is probably an object. Not continueing addTodoItem function");
       return value;
     }
-    /* We create a new Laminar Proxy model based on a simple POJO (plain old 
-    * Javascript object) that contains our TODOs description and if it is 
+    /* We create a new Laminar Proxy model based on a simple POJO (plain old
+    * Javascript object) that contains our TODOs description and if it is
     * completed.
     * We will later be able hook into each of these TODO proxy objects
     */
@@ -109,17 +109,17 @@
    *
    *   todosArr.push("This is my first todo.");
    *
-   * Our little handler function will, instead, turn that descripton into a 
+   * Our little handler function will, instead, turn that descripton into a
    * full object and insert the object into the todosArr array.
    */
 
   /*
-   * Next, we need to make something that works the other way and updates our 
+   * Next, we need to make something that works the other way and updates our
    * UI when we add a todo.
    *
    * Let's create another handler that reacts AFTER changes are detected in the
    * TODO list.
-   * 
+   *
    * We'll add it to the 'change' handler built into the todosArr proxy object.
    */
    todoListHandlerFunctions.addHandler("change",function(list,property) {
@@ -138,8 +138,8 @@
   });
 
   /* Now, let's build the UI elements that will be attached to the model
-   * 
-   * This is just a plain DIV element that will soon know how to build lists of 
+   *
+   * This is just a plain DIV element that will soon know how to build lists of
    * TODOs. Right now we just make an empty element.
    */
   var todoList = new Laminar.Widget({
@@ -192,7 +192,7 @@
    */
   todoList.buildItem = function(item,number) {
     /* When elements are deleted in arrays we might get here before the length
-     * property of the array has been set. So, we need to check if we actually 
+     * property of the array has been set. So, we need to check if we actually
      * have an element. This can't be used in all cases because sometimes you
      * might really be sending 'null' or 'undefined'
      */
@@ -243,7 +243,7 @@
       parent:itemDiv
     });
 
-    /* Now, let's build some of the connective tissue between the above UI 
+    /* Now, let's build some of the connective tissue between the above UI
      * elements and the model that we created earlier.
      */
 
