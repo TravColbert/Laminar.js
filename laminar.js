@@ -374,6 +374,10 @@ Laminar.Widget = (function(){
   Widget.prototype.getBoundingTop = function() {
     return this.domElement.getBoundingClientRect().top;
   };
+
+  Widget.prototype.getBoundingLeft = function() {
+    return this.domElement.getBoundingClientRect().left;
+  }
   /**
    * Return the position of this widget (left,top)
    *
