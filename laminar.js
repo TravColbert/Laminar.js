@@ -33,6 +33,7 @@ Laminar.Widget = (function(){
    * @private
    * @param {Object} configObj The configuration object
    */
+  /*
   var _clobber = function(configObj) {
     if(configObj.hasOwnProperty("clobber")) {
       if(configObj.hasOwnProperty("id")) {
@@ -45,13 +46,21 @@ Laminar.Widget = (function(){
     }
     return false;
   };
+  */
 
+  /**
+   * Acquire all of the attibutes of the DOM object and put them in the
+   * engulfing Laminar object.
+   * @param {*} domObj 
+   * @return configuration object
+   */
   var _gobble = function(domObj) {
     var attributeList = domObj.attributes;
+    //console.log(attributeList);
     //console.log("Gobbling element with the following attribs: " + JSON.stringify(attributeList));
     var widgetConfigObj = {};
     for(var count=0;count<attributeList.length;count++) {
-      //console.log("Attrib: " + attributeList[count].name + " = " + attributeList[count].value);
+      console.log("Attrib: " + attributeList[count].name + " = " + attributeList[count].value);
       widgetConfigObj[attributeList[count]["name"]] = attributeList[count]["value"];
     }
     widgetConfigObj["element"] = domObj["tagName"];
@@ -62,7 +71,7 @@ Laminar.Widget = (function(){
     if(widgetConfigObj.hasOwnProperty("class")) {
       widgetConfigObj.classlist = widgetConfigObj.class.split(" ");
     }
-    widgetConfigObj.clobber = true;
+    //widgetConfigObj.clobber = true;
     return widgetConfigObj;
   }
 
@@ -95,14 +104,17 @@ Laminar.Widget = (function(){
       var p;
       var gobbledElement = false;
       if(configObj.nodeType) {    // Its a DOM object
+        console.log("Found a node type");
         gobbledElement = true;
         this.domElement = configObj;
         this.addClass(defaultElementClass);
         configObj = _gobble(this.domElement);
+        console.log(JSON.stringify(configObj));
       } else if(typeof configObj=="string")  {
         this.domElement = _findElement(configObj);
         this.addClass(defaultElementClass);
       } else {
+        console.log("creating an element");
         this.element = configObj.element || defaultElementType;
         this.domElement = document.createElement(this.element);
       }
