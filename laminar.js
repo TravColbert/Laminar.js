@@ -126,10 +126,10 @@ Laminar.Widget = (function(){
       if(configObj.hasOwnProperty("classlist")) this.addClasses(configObj.classlist);
       if(configObj.hasOwnProperty("content")) this.content(configObj.content);
       if(configObj.hasOwnProperty("value")) this.set("value",configObj.value);
-      if(configObj.hasOwnProperty("proplist")) this.setProps(configObj["proplist"]);
-      if(configObj.hasOwnProperty("datalist")) this.setData(configObj["datalist"]);
+      if(configObj.hasOwnProperty("proplist")) this.setProps(configObj.proplist);
+      if(configObj.hasOwnProperty("datalist")) this.setData(configObj.datalist);
       if(configObj.hasOwnProperty("statelist")) {
-        this.states = configObj["statelist"];
+        this.states = configObj.statelist;
         this.setState();
       }
       if(configObj.hasOwnProperty("responsive")) {
