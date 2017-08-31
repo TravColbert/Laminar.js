@@ -60,7 +60,6 @@ Laminar.Widget = (function(){
     //console.log("Gobbling element with the following attribs: " + JSON.stringify(attributeList));
     var widgetConfigObj = {};
     for(var count=0;count<attributeList.length;count++) {
-      console.log("Attrib: " + attributeList[count].name + " = " + attributeList[count].value);
       widgetConfigObj[attributeList[count]["name"]] = attributeList[count]["value"];
     }
     widgetConfigObj["element"] = domObj["tagName"];
