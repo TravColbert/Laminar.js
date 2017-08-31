@@ -51,7 +51,7 @@ Laminar.Widget = (function(){
   /**
    * Acquire all of the attibutes of the DOM object and put them in the
    * engulfing Laminar object.
-   * @param {*} domObj 
+   * @param {*} domObj
    * @return configuration object
    */
   var _gobble = function(domObj) {
@@ -103,18 +103,17 @@ Laminar.Widget = (function(){
     if(configObj) {
       var p;
       var gobbledElement = false;
-      if(configObj.nodeType) {    // Its a DOM object
-        console.log("Found a node type");
+      if(configObj.nodeType) {
+        // You gave is a DOM object...
         gobbledElement = true;
         this.domElement = configObj;
         this.addClass(defaultElementClass);
         configObj = _gobble(this.domElement);
-        console.log(JSON.stringify(configObj));
-      } else if(typeof configObj=="string")  {
+      } else if(typeof configObj=="string") {
+        // If you gave us a CSS selector...
         this.domElement = _findElement(configObj);
         this.addClass(defaultElementClass);
       } else {
-        console.log("creating an element");
         this.element = configObj.element || defaultElementType;
         this.domElement = document.createElement(this.element);
       }
@@ -141,7 +140,13 @@ Laminar.Widget = (function(){
           }.bind(this));
         }
       }
-      this.setParent(p);
+      /**
+       * gobbledElement is set TRUE when we give Laminar a DOM object.
+       * Otherwise, it's a new object that hasn't been plugged into the DOM
+       * fully.
+       * setParent() does this step but not for pre-existing DOM objects
+       */
+      if(!gobbledElement) this.setParent(p);
     }
 
     this.mutations.observe(this.domElement, {attributes: true});
@@ -208,7 +213,7 @@ Laminar.Widget = (function(){
 
   /**
    * Set a new element type
-   * 
+   *
    * @param {string} element The type of element to change to
    * @returns {Object} The Laminar Widget object
    */
