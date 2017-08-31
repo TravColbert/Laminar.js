@@ -6,7 +6,8 @@
 
 var Laminar = Laminar || {};
 
-Laminar.createModel = function(obj,handlerFunctionObj) {
+Laminar.createModel = function(obj,handlerFunctionObj,debug) {
+  debug = debug || false;
   var handlerFunctionProperty = "handlerFunctions";
   var handlerFunctionSuffix = "HandlerFunctions";
   var makeProxyHandlerObj = function(handlerFunctionObj) {
@@ -41,15 +42,15 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
         var thisHandler = "set";
         var result = true;
         for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
-          console.log("proxyHandler:",thisHandler,":function #",f);
+          if(debug) console.log("proxyHandler:",thisHandler,":function #",f);
           value = this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property,value,receiver);
         }
-        console.log("proxyHandler:",thisHandler,": ",JSON.stringify(target),"SET value",value,"on property",property);
+        if(debug) console.log("proxyHandler:",thisHandler,": ",JSON.stringify(target),"SET value",value,"on property",property);
         if(!target) return result;
         var result = ((target[property] = value)!==false) ? true : false;
         //if(result) {
-          console.log("proxyHandler:",thisHandler,": Result of SET value",value,"on property",property,"is",result);
-          console.log("Performing dirty functions");
+          if(debug) console.log("proxyHandler:",thisHandler,": Result of SET value",value,"on property",property,"is",result);
+          if(debug) console.log("Performing dirty functions");
           markDirty(target,property);
           this.change(target,property);
         //}
@@ -59,12 +60,12 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
         if(!property in target) return false;
         var thisHandler = "deleteProperty";
         for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
-          console.log("proxyHandler:",thisHandler,":function #",f);
+          if(debug) console.log("proxyHandler:",thisHandler,":function #",f);
           this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property);
         }
         var result = !!(delete target[property]);
         //if(result) {
-          console.log("proxyHandler:",thisHandler,": Result of DELETE operation on property",property,"is",result);
+          if(debug) console.log("proxyHandler:",thisHandler,": Result of DELETE operation on property",property,"is",result);
           this.change(target,property);
         //}
         return result;
@@ -72,7 +73,7 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
       change: function(target,property) {
         var thisHandler = "change";
         for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
-          console.log("Launching change handler on property:",property);
+          if(debug) console.log("Launching change handler on property:",property);
           this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property);
         }
         return;
@@ -100,7 +101,7 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
           configurable:false,
           enumerable:false,
           value:function(type,func) {
-            console.log("createModel: Adding handler: " + type + handlerFunctionSuffix);
+            if(debug) console.log("createModel: Adding handler: " + type + handlerFunctionSuffix);
             if(!this.hasOwnProperty(type + handlerFunctionSuffix)) return;
             this[type + handlerFunctionSuffix].push(func);
           }
@@ -111,7 +112,7 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
     for(var handler in proxyHandler) {
       if(!proxyHandler.hasOwnProperty(handler) || handler==handlerFunctionProperty) continue;
       if(proxyHandler.handlerFunctions.hasOwnProperty(handler + handlerFunctionSuffix)) continue;
-      console.log("createModel: Creating empty function array for " + handler + " at: " + handler + handlerFunctionSuffix);
+      if(debug) console.log("createModel: Creating empty function array for " + handler + " at: " + handler + handlerFunctionSuffix);
       Object.defineProperty(
         proxyHandler.handlerFunctions,
         handler + handlerFunctionSuffix,
@@ -140,7 +141,7 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
         // Signal listening objects of dirty values;
         if(this.hasOwnProperty("__dirty")) {
           this.__dirty.forEach(function(v,i,a) {
-            console.log(v,"is dirty");
+            if(debug) console.log(v,"is dirty");
           });
         }
         return this;
@@ -155,8 +156,8 @@ Laminar.createModel = function(obj,handlerFunctionObj) {
       configurable:false,
       enumerable:false,
       value:function() {
-        console.log("Fetching proxyHandlerObj");
-        console.log(JSON.stringify(handlerFunctionObj));
+        if(debug) console.log("Fetching proxyHandlerObj");
+        if(debug) console.log(JSON.stringify(handlerFunctionObj));
         return handlerFunctionObj;
       }
     }
