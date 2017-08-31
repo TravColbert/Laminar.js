@@ -368,12 +368,32 @@ Laminar.Widget = (function(){
     return this.getProp("classList");
   }
   /**
+   * Get position of both TOP and LEFT sides of element taking into
+   * consideration the containing elements.
+   * 
+   * This is an absolute position
+   */
+  Widget.prototype.getOffset = function() {
+    var element = this.domElement;
+    var top = 0, left = 0;
+        top += element.offsetTop  || 0;
+        left += element.offsetLeft || 0;
+    do {
+        element = element.offsetParent;
+    } while(element);
+
+    return {
+        top: top,
+        left: left
+    };
+  }
+  /**
    * Return the position of the LEFT side of this widget
    *
    * @returns {number} The pixels of the left side of the widget
    */
   Widget.prototype.getLeft = function() {
-    return this.domElement.offsetLeft;
+    return this.getOffset().left;
   };
   /**
    * Return the position of the TOP side of this widget
@@ -381,7 +401,7 @@ Laminar.Widget = (function(){
    * @returns {number} The pixels of the top side of the widget
    */
   Widget.prototype.getTop = function() {
-    return this.domElement.offsetTop;
+    return this.getOffset().top;
   };
 
   Widget.prototype.getScrollTop = function() {
