@@ -369,7 +369,7 @@ Laminar.Widget = (function(){
   /**
    * Get position of both TOP and LEFT sides of element taking into
    * consideration the containing elements.
-   * 
+   *
    * This is an absolute position
    */
   Widget.prototype.getOffset = function() {
@@ -410,6 +410,10 @@ Laminar.Widget = (function(){
   Widget.prototype.getBoundingTop = function() {
     return this.domElement.getBoundingClientRect().top;
   };
+
+  Widget.prototype.getBoundingBottom = function() {
+    return this.domElement.getBoundingClientRect().bottom;
+  }
 
   Widget.prototype.getBoundingLeft = function() {
     return this.domElement.getBoundingClientRect().left;
