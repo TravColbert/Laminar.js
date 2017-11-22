@@ -42,8 +42,8 @@ Laminar.createModel = function(obj,handlerFunctionObj,debug) {
         var thisHandler = "set";
         var result = true;
         let targetValue;
-        if(debug) console.log("proxyHandler:",thisHandler,"called in value:");
-        if(debug) console.log(value);
+        if(this.debug) console.log("proxyHandler:",thisHandler,"called in value:");
+        // if(debug) console.log(value);
         /* So, the trouble is if the value is a primitive or an object
          * The value of primitives: boolean, null, string, number, etc 
          * get COPIED. But objects: objects and arrays get copied by 
@@ -63,21 +63,21 @@ Laminar.createModel = function(obj,handlerFunctionObj,debug) {
         } else {
           targetValue = value;
         }
-        if(debug) console.log(targetValue);
+        if(this.debug) console.log("??",targetValue);
         for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
-          if(debug) console.log("proxyHandler:",thisHandler,":function #",f);
+          if(this.debug) console.log("proxyHandler:",thisHandler,":function #",f);
           targetValue = this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property,targetValue,receiver);
-          if(debug) console.log(JSON.stringify(targetValue));
+          // if(debug) console.log(JSON.stringify(targetValue));
           if(targetValue===undefined) {
-            if(debug) console.log("SET-handler chain broken by bad value");
+            if(this.debug) console.log("SET-handler chain broken by bad value");
             return false;
           };
         }
-        if(debug) console.log("proxyHandler:",thisHandler,": ",JSON.stringify(target),"SET value",targetValue,"on property",property);
+        if(this.debug) console.log("proxyHandler:",thisHandler,": ",JSON.stringify(target),"SET value",targetValue,"on property",property);
         if(!target) return result;
         var result = ((target[property] = targetValue)!==false) ? true : false;
-        if(debug) console.log("proxyHandler:",thisHandler,": Result of SET value",targetValue,"on property",property,"is",result);
-        if(debug) console.log("Performing dirty functions");
+        if(this.debug) console.log("proxyHandler:",thisHandler,": Result of SET value",targetValue,"on property",property,"is",result);
+        if(this.debug) console.log("Performing dirty functions");
         markDirty(target,property);
         this.change(target,property);
         return result;
@@ -86,14 +86,12 @@ Laminar.createModel = function(obj,handlerFunctionObj,debug) {
         if(!property in target) return false;
         var thisHandler = "deleteProperty";
         for(var f in this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix]) {
-          if(debug) console.log("proxyHandler:",thisHandler,":function #",f);
+          if(this.debug) console.log("proxyHandler:",thisHandler,":function #",f);
           this[handlerFunctionProperty][thisHandler + handlerFunctionSuffix][f](target,property);
         }
         var result = !!(delete target[property]);
-        //if(result) {
-          if(debug) console.log("proxyHandler:",thisHandler,": Result of DELETE operation on property",property,"is",result);
-          this.change(target,property);
-        //}
+        if(this.debug) console.log("proxyHandler:",thisHandler,": Result of DELETE operation on property",property,"is",result);
+        this.change(target,property);
         return result;
       },
       change: function(target,property) {
@@ -190,6 +188,40 @@ Laminar.createModel = function(obj,handlerFunctionObj,debug) {
     }
   );
 
+  Object.defineProperty(
+    newProxyObj,
+    "addMethod",
+    {
+      configurable:false,
+      enumerable:false,
+      value:function(name,func,thisObj) {
+        thisObj = thisObj || this;
+        if(thisObj.hasOwnProperty(name)) {
+          console.log("We already have a property in this object called",name,"quitting.");
+          return false;
+        }
+        console.log("Trying to make a method called",name);
+        let wrapperFunc = function() {
+          if(thisObj.debug) console.log("Starting function:",name);
+          let aList = Array.from(arguments);  // Turns the arguments object into a real array
+          try{
+            return func.apply(this,aList);
+          } catch(e) {
+            if(thisObj.debug) console.log(name,"function failed with",e.message);
+          }
+        }.bind(thisObj);
+        Object.defineProperty(
+          newProxyObj,
+          name,
+          {
+            configurable:false,
+            enumerable:false,
+            value:wrapperFunc
+          }
+        );
+      }
+    }
+  );
 
   return newProxyObj;
 }
